@@ -1,0 +1,19 @@
+[Unit]
+Description=Kala daily cycle (scan, manage exits, paper trade, notify)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=kala
+Group=kala
+WorkingDirectory=/opt/kala
+# Same secrets file as the bot service — the daily run also sends Telegram
+# messages, so it needs the credentials too. See DEPLOY_VPS.md step 6a.
+EnvironmentFile=/etc/kala/telegram.env
+ExecStart=/opt/kala/.venv/bin/python /opt/kala/daily_run.py
+# 3 hours matches the ExecutionTimeLimit the old Windows Task Scheduler job
+# used -- a full ~600-ticker scan plus the (rare) quarterly walk-forward can
+# legitimately take a while; this is a safety net against a genuine hang,
+# not a normal-case limit.
+TimeoutStartSec=10800

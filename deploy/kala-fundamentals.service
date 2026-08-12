@@ -1,0 +1,20 @@
+[Unit]
+Description=Kala monthly fundamental-statement archive (point-in-time snapshot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=kala
+Group=kala
+WorkingDirectory=/opt/kala
+# Same secrets file as the other two services -- archive_fundamentals.py
+# doesn't send Telegram messages itself, but sharing one EnvironmentFile
+# keeps deployment simple and avoids a second secrets file to manage.
+EnvironmentFile=/etc/kala/telegram.env
+# Default tickers (open positions + watchlist) match what daily_run.py
+# already tracks -- see archive_fundamentals.py --help. Widen with
+# --tickers if you want the archive to cover the full target_allocation
+# regardless of open positions.
+ExecStart=/opt/kala/.venv/bin/python /opt/kala/archive_fundamentals.py
+TimeoutStartSec=1800

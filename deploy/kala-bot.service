@@ -1,0 +1,25 @@
+[Unit]
+Description=Kala Telegram bot (long-polling)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kala
+Group=kala
+WorkingDirectory=/opt/kala
+# Telegram token/chat_id come from a root-owned secrets file (mode 600), NOT
+# from runner_config.json — so the secret never sits in a file that gets
+# zipped/copied/shared. Both this and kala-daily.service read the same
+# file. Create it per DEPLOY_VPS.md step 6a before starting the service.
+EnvironmentFile=/etc/kala/telegram.env
+ExecStart=/opt/kala/.venv/bin/python /opt/kala/telegram_bot.py
+Restart=on-failure
+RestartSec=10
+# Cap restart attempts so a permanent config error (bad token, etc.) doesn't
+# spin the CPU forever -- 5 restarts within 60s and systemd stops trying.
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

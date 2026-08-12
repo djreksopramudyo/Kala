@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+results/
+paper_state*.json
+runner_config.json
+.env
+heartbeat.txt
+*.db

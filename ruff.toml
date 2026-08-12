@@ -1,0 +1,50 @@
+# Lint config — deliberately pragmatic, not maximalist. The goal is to catch
+# real bugs (undefined names, unused imports that hide dead code, bare
+# excepts that swallow errors) without churning the whole codebase over
+# style opinions.
+
+target-version = "py311"
+line-length = 100
+
+# Don't lint the virtualenv, caches, generated output, or the pre-package
+# LEGACY monolith scripts (HOW_IT_WORKS.md marks these "legacy / secondary";
+# the maintained code is the kala/ package + telegram_bot.py + daily_run.py
+# + run_*.py wrappers + tests/, and THOSE are held to the full ruleset).
+extend-exclude = [
+    ".venv", "results", "__pycache__", ".pytest_cache",
+    "kala_engine.py",
+    "kala_fundamental_only.py",
+]
+
+[lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes — undefined names, unused imports, the real-bug stuff
+    "W",    # pycodestyle warnings
+    "B",    # flake8-bugbear — likely bugs (incl. bare except, mutable defaults)
+    "I",    # isort — import ordering
+]
+ignore = [
+    "E501",  # line length is enforced by line-length, not as a hard error
+    "E741",  # ambiguous variable names (l/I/O) — common in math code here
+    "B008",  # function calls in argument defaults — used deliberately in places
+    # Purely cosmetic — deferred, not bug-hiding. Kept out so CI enforces the
+    # real rules (undefined names, unused imports, bare except) without
+    # churning the whole codebase over formatting opinions.
+    "E701",  # multiple statements on one line (colon)
+    "E702",  # multiple statements on one line (semicolon)
+    "E402",  # module import not at top (deliberate lazy imports in a few files)
+    "B905",  # zip() without strict= (pre-3.10 habit; harmless here)
+    "B007",  # unused loop variable
+    "W291", "W293",  # trailing / blank-line whitespace
+]
+
+[lint.per-file-ignores]
+# Tests use star-ish fixtures and long descriptive names; relax there.
+"tests/**" = ["B011"]
+# Secondary/legacy live scripts (imported for their functions, not actively
+# maintained line-by-line): tolerate harmless dead locals / an unused import
+# rather than risk surgically editing their computation blocks. The
+# kala/ package and tests keep full unused-name enforcement.
+"kala_daily_trader.py" = ["F841"]
+"portfolio_optimizer.py" = ["F841", "F401"]

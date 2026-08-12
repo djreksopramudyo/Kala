@@ -1,0 +1,1965 @@
+{
+  "rows": [
+    {
+      "id": "e89d26513ed1b02b04b1fb780ef5a4c0",
+      "name": "Pendapatan dari premi asuransi",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 2003240000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 0,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 0
+    },
+    {
+      "id": "47c9cc6d89ffb65b45d47c0e94d18784",
+      "name": "Beban bunga",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 13364495000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 12532290000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 12268952000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -8251682000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -9491401000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -11241891000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -13360347000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 1
+    },
+    {
+      "id": "9758a55e57148e929da36524c4105b67",
+      "name": "Keuntungan (kerugian) yang telah direalisasi atas instrumen derivatif",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 1237711000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 1017208000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 607471000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 346244000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 1432313000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 751766000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 2885242000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 2
+    },
+    {
+      "id": "d37ef0302a600627e58889cfe7f05328",
+      "name": "Pendapatan transaksi perdagangan",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 2769433000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 1837321000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 1280029000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 941162000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 1340014000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 3551007000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 571100000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 3
+    },
+    {
+      "id": "4e5abe3fd3fc1b801ec309f8307b8c72",
+      "name": "Pendapatan bunga",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 98912652000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 94796454000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 87397774000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 72241191000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 65626976000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 65403161000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 63837795000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 4
+    },
+    {
+      "id": "4f753c64fd4dfb42f9ca6010bc7c2de3",
+      "name": "Pemulihan penyisihan kerugian penurunan nilai aset keuangan",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": -4011047000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": -2034453000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -2238491000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -4332146000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -7703731000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 606155000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 3690842000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 4
+    },
+    {
+      "id": "964ecf7b73cf1c9021ae07031360cd4e",
+      "name": "Beban umum dan administrasi",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 16780115000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 16874142000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 17496896000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -15390436000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -13494571000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -12978260000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -14115175000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 4
+    },
+    {
+      "id": "9e83c45217cd4950705c6a836c811101",
+      "name": "Pembentukan penyisihan kerugian penurunan nilai aset non-produktif",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -28600000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 0,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 4
+    },
+    {
+      "id": "fde930a31b77b34d15e6a5cc307c0b4f",
+      "name": "Pendapatan operasional lainnya",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 22198323000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 23149755000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 22895062000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 22153232000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 19555673000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 16692857000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 17688442000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 5
+    },
+    {
+      "id": "a34c5343dd0ba2642f0badbe0aec3211",
+      "name": "Pendapatan dividen",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 107764000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 38095000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 34528000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 46530000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 10034000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 9147000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 1445000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 6
+    },
+    {
+      "id": "ae2aa78d7b27ab81d5bac6ce7ca5a6da",
+      "name": "Pembentukan penyisihan kerugian penurunan nilai aset produktif",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 24558000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -194473000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -1620264000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -12205631000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -8282185000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 6
+    },
+    {
+      "id": "f4c04bc705ed0d5eb5202a13dcf1ff86",
+      "name": "Beban operasional lainnya",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 19954288000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 21180096000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 20005671000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -17092229000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -16813629000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -16990455000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -16627033000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 8
+    },
+    {
+      "id": "e34b2885507e3f9fa12a600645df91ca",
+      "name": "Jumlah laba operasional",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 71260876000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 68217850000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 60179757000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 50467033000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 38841174000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 33568507000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 36288998000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 9
+    },
+    {
+      "id": "b9b573dafc1d5d1ee87a367d33900e16",
+      "name": "Jumlah laba (rugi) sebelum pajak penghasilan",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 71260876000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 68217850000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 60179757000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 50467033000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 38841174000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 33568507000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 36288998000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 11
+    },
+    {
+      "id": "c856bc0997fb12a7bdabdf727da0df3d",
+      "name": "Pendapatan (beban) pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": -13697783000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": -13366576000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -11521662000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -9711461000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -7401015000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -6421398000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -7719024000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 12
+    },
+    {
+      "id": "4417687f1e1dfeef7746057d55c7e39e",
+      "name": "Jumlah laba (rugi) dari operasi yang dilanjutkan",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 57563093000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 54851274000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 48658095000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 40755572000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 31440159000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 27147109000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 28569974000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 13
+    },
+    {
+      "id": "682a1896a620bc7452a4177ff58b2167",
+      "name": "Keuntungan (kerugian) selisih kurs penjabaran, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 35287000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -7866000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 52708000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 4568000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 8108000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -15438000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 13
+    },
+    {
+      "id": "a6537d3bcdb2852c73f856603b3d7780",
+      "name": "Pendapatan komprehensif lainnya atas keuntungan (kerugian) hasil revaluasi aset tetap, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 252056000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 238886000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 231837000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 1225786000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 90000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 469000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 769197000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 13
+    },
+    {
+      "id": "6e47c3d31596c74e3ebb72223ae1aa03",
+      "name": "Jumlah laba (rugi)",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 57563093000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 54851274000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 48658095000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 40755572000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 31440159000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 27147109000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 28569974000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 14
+    },
+    {
+      "id": "a5e71c1d4842179cab6158283e257c77",
+      "name": "Pendapatan komprehensif lainnya atas pengukuran kembali kewajiban manfaat pasti, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": -804399000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 71872000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -559449000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -349596000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 1667261000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -1483912000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -341292000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 15
+    },
+    {
+      "id": "91cbcc77f29b00846a36f4bb0f6d4f61",
+      "name": "Jumlah pendapatan komprehensif lainnya yang tidak akan direklasifikasi ke laba rugi, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": -552343000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 310758000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -327612000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 876190000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 1667351000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -1483443000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 427905000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 16
+    },
+    {
+      "id": "00c623a7ce811f4a95e8a4e48726995a",
+      "name": "Keuntungan (kerugian) yang belum direalisasi atas perubahan nilai wajar aset keuangan melalui penghasilan komprehensif lain, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 2273789000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": -824292000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -1083532000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -5329799000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 0,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 18
+    },
+    {
+      "id": "33b4c3787a3951cbe8f7fa0248c36c53",
+      "name": "Jumlah pendapatan komprehensif lainnya yang akan direklasifikasi ke laba rugi, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 2172600000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": -789005000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -1091398000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -5277091000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -1140047000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 6298946000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 2589520000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 18
+    },
+    {
+      "id": "bf00a0ee8245190db41691d5dd6f69b9",
+      "name": "Jumlah pendapatan komprehensif lainnya, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 1620257000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": -478247000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -1419010000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -4400901000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 527304000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 4815503000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 3017425000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 19
+    },
+    {
+      "id": "374c5ee82f12aab7381e6a74d55cadf1",
+      "name": "Pajak atas pendapatan komprehensif lainnya",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 274293000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": -133293000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -312801000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 1078183000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -100398000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -926161000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -449138000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 20
+    },
+    {
+      "id": "9ee8ba89e76c36b163eff738a301b88e",
+      "name": "Keuntungan (kerugian) yang belum direalisasi atas perubahan nilai wajar aset keuangan yang tersedia untuk dijual, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -1144615000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 6290838000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 2604958000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 20
+    },
+    {
+      "id": "f14e1b4370aa27cbc21634935389c172",
+      "name": "Jumlah pendapatan komprehensif lainnya, setelah pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 1345964000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": -344954000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": -1106209000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -3322718000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 426906000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 3889342000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 2568287000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 21
+    },
+    {
+      "id": "3fcf23d265a65637d26df74c02399843",
+      "name": "Jumlah laba rugi komprehensif",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 58909057000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 54506320000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 47551886000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 37432854000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 31867065000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 31036451000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 31138261000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 22
+    },
+    {
+      "id": "7bfee2404c4cd91580e0aca44317fa39",
+      "name": "Laba (rugi) yang dapat diatribusikan ke entitas induk",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 57537287000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 54836305000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 48639122000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 40735722000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 31422660000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 27131109000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 28565053000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 23
+    },
+    {
+      "id": "40444dd0fbd1c98a4f9aade5589b41d3",
+      "name": "Laba (rugi) yang dapat diatribusikan ke kepentingan non-pengendali",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 25806000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 14969000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 18973000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 19850000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 17499000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 16000000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 4921000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 24
+    },
+    {
+      "id": "9f52b02f34270ce447f7ab9da107c173",
+      "name": "Beban asuransi lainnya",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 1858302000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 0,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 24
+    },
+    {
+      "id": "b84e68ee709203033e89b294b9ba2b19",
+      "name": "Laba rugi komprehensif yang dapat diatribusikan ke entitas induk",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 58882446000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 54493191000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 47533598000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 37413477000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 31849276000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 31018293000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 31131779000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 25
+    },
+    {
+      "id": "dea8df197fe328088a2c9e4eac3edf20",
+      "name": "Laba rugi komprehensif yang dapat diatribusikan ke kepentingan non-pengendali",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 26611000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 13129000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 18288000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 19377000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 17789000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 18158000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 6482000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 26
+    },
+    {
+      "id": "de0a13430d94d7943ea8bc718bb3f67d",
+      "name": "Laba (rugi) per saham dasar dari operasi yang dilanjutkan",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 467000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 445000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 395000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 330000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 255000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 1100000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 1159000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 27
+    },
+    {
+      "id": "1ef123d2bbf0a231ebdd2ad294810ca6",
+      "name": "Laba (rugi) per saham dilusian dari operasi yang dilanjutkan",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 467000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 445000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 395000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 330000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 255000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 1100000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 1159000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 28
+    },
+    {
+      "id": "811b2c424a6842594804d8caa4757ea1",
+      "name": "Penyesuaian lainnya atas pendapatan komprehensif lainnya yang akan direklasifikasi ke laba rugi, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": -101189000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": 0,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 32
+    },
+    {
+      "id": "9cea24269aa06e8569548749ebeb10f5",
+      "name": "Beban provisi dan komisi",
+      "level": 0,
+      "values": [
+        {
+          "col": "FY 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2024",
+          "year": 2024,
+          "amount": 2000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2023",
+          "year": 2023,
+          "amount": 539000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2022",
+          "year": 2022,
+          "amount": -360000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2021",
+          "year": 2021,
+          "amount": -240000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2020",
+          "year": 2020,
+          "amount": -749000000,
+          "period": "FY"
+        },
+        {
+          "col": "FY 2019",
+          "year": 2019,
+          "amount": -1128000000,
+          "period": "FY"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 57
+    }
+  ],
+  "columns": [
+    {
+      "year": 2025,
+      "label": "FY 2025",
+      "period": "FY"
+    },
+    {
+      "year": 2024,
+      "label": "FY 2024",
+      "period": "FY"
+    },
+    {
+      "year": 2023,
+      "label": "FY 2023",
+      "period": "FY"
+    },
+    {
+      "year": 2022,
+      "label": "FY 2022",
+      "period": "FY"
+    },
+    {
+      "year": 2021,
+      "label": "FY 2021",
+      "period": "FY"
+    },
+    {
+      "year": 2020,
+      "label": "FY 2020",
+      "period": "FY"
+    },
+    {
+      "year": 2019,
+      "label": "FY 2019",
+      "period": "FY"
+    }
+  ]
+}

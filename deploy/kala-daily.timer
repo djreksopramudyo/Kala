@@ -1,0 +1,20 @@
+# Matches the old Windows Task Scheduler job: weekdays for the normal cycle,
+# Saturday adds the weekly fundamental screen (daily_run.py itself decides
+# what runs on which day). Assumes the SERVER's timezone is Asia/Jakarta --
+# see DEPLOY_VPS.md step 3. On a UTC server instead, change 17:00:00 below
+# to 10:00:00 (WIB is UTC+7).
+
+[Unit]
+Description=Run Kala's daily cycle at 17:00 WIB, Mon-Sat
+
+[Timer]
+OnCalendar=Mon..Sat *-*-* 17:00:00
+# If the server was off/rebooting exactly at 17:00, fire once as soon as
+# it's back up instead of silently skipping the day -- an actual improvement
+# over the laptop setup, where an evening-off PC meant that day was skipped
+# for good (Task Scheduler can't wake a powered-off machine; a VPS is never
+# powered off in normal operation, so this mostly covers reboots/updates).
+Persistent=true
+
+[Install]
+WantedBy=timers.target

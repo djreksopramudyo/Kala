@@ -1,0 +1,19 @@
+# Monthly point-in-time snapshot of reported financial statements, for the
+# restatement check that unlocks the one hypothesis PROJECT_STATUS.md leaves
+# genuinely open (fundamental-value tilt) -- it needs snapshots taken real
+# calendar time apart, not more code, so this just needs to keep firing.
+# Assumes the SERVER's timezone is Asia/Jakarta, matching kala-daily.timer --
+# see DEPLOY_VPS.md step 3. On a UTC server, change 18:00:00 to 11:00:00.
+
+[Unit]
+Description=Run Kala's fundamental archive on the 1st of each month, 18:00 WIB
+
+[Timer]
+OnCalendar=*-*-01 18:00:00
+# If the server was down on the 1st, fire once on the next boot rather than
+# waiting a full month for the next scheduled date -- a monthly cadence has
+# much more to lose from a silently skipped run than the daily job does.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

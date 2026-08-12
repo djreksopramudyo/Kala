@@ -1,0 +1,2018 @@
+{
+  "rows": [
+    {
+      "id": "e89d26513ed1b02b04b1fb780ef5a4c0",
+      "name": "Pendapatan dari premi asuransi",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 532089000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 0
+    },
+    {
+      "id": "47c9cc6d89ffb65b45d47c0e94d18784",
+      "name": "Beban bunga",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 3483815000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 10039117000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 6729013000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 3248158000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 9355229000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 6182567000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -8899100000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -5602538000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 1
+    },
+    {
+      "id": "9758a55e57148e929da36524c4105b67",
+      "name": "Keuntungan (kerugian) yang telah direalisasi atas instrumen derivatif",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 339548000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 906137000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 636353000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 226568000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 586867000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 291228000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 556708000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 624768000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 2
+    },
+    {
+      "id": "d37ef0302a600627e58889cfe7f05328",
+      "name": "Pendapatan transaksi perdagangan",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 709371000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 2148500000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 1180939000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 685623000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 1955055000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 1161703000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 782407000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 298530000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 3
+    },
+    {
+      "id": "4e5abe3fd3fc1b801ec309f8307b8c72",
+      "name": "Pendapatan bunga",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 24592248000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 73985468000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 49313964000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 24366718000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 70288000000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 46077910000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 64614433000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 42585308000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 4
+    },
+    {
+      "id": "4f753c64fd4dfb42f9ca6010bc7c2de3",
+      "name": "Pemulihan penyisihan kerugian penurunan nilai aset keuangan",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": -1232275000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": -3522726000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": -2011459000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": -1031032000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": -2367089000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": -1405716000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -2105379000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -1655815000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 4
+    },
+    {
+      "id": "964ecf7b73cf1c9021ae07031360cd4e",
+      "name": "Beban umum dan administrasi",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 3434164000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 11873670000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 7782988000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 3692273000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 11305707000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 7036524000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -12449961000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -7712325000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 4
+    },
+    {
+      "id": "fde930a31b77b34d15e6a5cc307c0b4f",
+      "name": "Pendapatan operasional lainnya",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 5743384000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 18775137000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 12270678000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 6092137000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 17030117000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 11311128000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 17490765000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 11623799000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 5
+    },
+    {
+      "id": "a34c5343dd0ba2642f0badbe0aec3211",
+      "name": "Pendapatan dividen",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 1293000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 100795000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 41324000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 1439000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 31997000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 13968000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 33571000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 10937000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 6
+    },
+    {
+      "id": "ae2aa78d7b27ab81d5bac6ce7ca5a6da",
+      "name": "Pembentukan penyisihan kerugian penurunan nilai aset produktif",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -186187000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -226078000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 6
+    },
+    {
+      "id": "f4c04bc705ed0d5eb5202a13dcf1ff86",
+      "name": "Beban operasional lainnya",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 5238479000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 16713580000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 11126139000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 5945360000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 16017754000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 11008369000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -14826732000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -10063489000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 8
+    },
+    {
+      "id": "e34b2885507e3f9fa12a600645df91ca",
+      "name": "Jumlah laba operasional",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 18077072000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 53766944000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 35793659000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 17455662000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 50846254000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 33222566000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 45010173000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 29882839000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 9
+    },
+    {
+      "id": "b9b573dafc1d5d1ee87a367d33900e16",
+      "name": "Jumlah laba (rugi) sebelum pajak penghasilan",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 18077072000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 53766944000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 35793659000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 17455662000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 50846254000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 33222566000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 45010173000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 29882839000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 11
+    },
+    {
+      "id": "c856bc0997fb12a7bdabdf727da0df3d",
+      "name": "Pendapatan (beban) pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": -3387273000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": -10353481000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": -6770690000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": -3308672000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": -9758365000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": -6345067000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -8570054000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -5682816000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 12
+    },
+    {
+      "id": "4417687f1e1dfeef7746057d55c7e39e",
+      "name": "Jumlah laba (rugi) dari operasi yang dilanjutkan",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 14689799000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 43413463000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 29022969000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 14146990000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 41087889000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 26877499000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 36440119000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 24200023000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 13
+    },
+    {
+      "id": "682a1896a620bc7452a4177ff58b2167",
+      "name": "Keuntungan (kerugian) selisih kurs penjabaran, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": -247000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 10294000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 14390000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 42025000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -6646000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -26203000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 13
+    },
+    {
+      "id": "6e47c3d31596c74e3ebb72223ae1aa03",
+      "name": "Jumlah laba (rugi)",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 14689799000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 43413463000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 29022969000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 14146990000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 41087889000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 26877499000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 36440119000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 24200023000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 14
+    },
+    {
+      "id": "a5e71c1d4842179cab6158283e257c77",
+      "name": "Pendapatan komprehensif lainnya atas pengukuran kembali kewajiban manfaat pasti, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": -206154000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 52025000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 15
+    },
+    {
+      "id": "91cbcc77f29b00846a36f4bb0f6d4f61",
+      "name": "Jumlah pendapatan komprehensif lainnya yang tidak akan direklasifikasi ke laba rugi, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": -206154000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 52025000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 16
+    },
+    {
+      "id": "00c623a7ce811f4a95e8a4e48726995a",
+      "name": "Keuntungan (kerugian) yang belum direalisasi atas perubahan nilai wajar aset keuangan melalui penghasilan komprehensif lain, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": -1833634000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 2367287000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 1246206000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 441828000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 412121000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": -679591000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -895510000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 460339000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 18
+    },
+    {
+      "id": "33b4c3787a3951cbe8f7fa0248c36c53",
+      "name": "Jumlah pendapatan komprehensif lainnya yang akan direklasifikasi ke laba rugi, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": -1744600000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 2367287000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 1244574000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 450737000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 426511000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": -637566000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -902156000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 434136000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 18
+    },
+    {
+      "id": "bf00a0ee8245190db41691d5dd6f69b9",
+      "name": "Jumlah pendapatan komprehensif lainnya, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": -1744600000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 2161133000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 1244574000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 450737000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 478536000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": -637566000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -902156000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 434136000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 19
+    },
+    {
+      "id": "374c5ee82f12aab7381e6a74d55cadf1",
+      "name": "Pajak atas pendapatan komprehensif lainnya",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": -358417000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 396491000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 239633000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 84778000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 97626000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": -128608000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 169740000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -87799000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 20
+    },
+    {
+      "id": "f14e1b4370aa27cbc21634935389c172",
+      "name": "Jumlah pendapatan komprehensif lainnya, setelah pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": -1386183000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 1764642000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 1004941000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 365959000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 380910000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": -508958000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -732416000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 346337000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 21
+    },
+    {
+      "id": "3fcf23d265a65637d26df74c02399843",
+      "name": "Jumlah laba rugi komprehensif",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 13303616000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 45178105000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 30027910000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 14512949000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 41468799000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 26368541000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 35707703000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 24546360000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 22
+    },
+    {
+      "id": "7bfee2404c4cd91580e0aca44317fa39",
+      "name": "Laba (rugi) yang dapat diatribusikan ke entitas induk",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 14684123000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 43397415000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 29016414000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 14146131000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 41073863000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 26876184000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 36420377000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 24190206000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 23
+    },
+    {
+      "id": "40444dd0fbd1c98a4f9aade5589b41d3",
+      "name": "Laba (rugi) yang dapat diatribusikan ke kepentingan non-pengendali",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 5676000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 16048000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 6555000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 859000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 14026000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 1315000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 19742000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 9817000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 24
+    },
+    {
+      "id": "9f52b02f34270ce447f7ab9da107c173",
+      "name": "Beban asuransi lainnya",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 451628000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 24
+    },
+    {
+      "id": "b84e68ee709203033e89b294b9ba2b19",
+      "name": "Laba rugi komprehensif yang dapat diatribusikan ke entitas induk",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 13298307000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 45153366000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 30017551000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 14511934000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 41454164000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 26368068000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 35689159000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 24536764000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 25
+    },
+    {
+      "id": "dea8df197fe328088a2c9e4eac3edf20",
+      "name": "Laba rugi komprehensif yang dapat diatribusikan ke kepentingan non-pengendali",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 5309000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 24739000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 10359000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 1015000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 14635000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 473000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 18544000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 9596000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 26
+    },
+    {
+      "id": "de0a13430d94d7943ea8bc718bb3f67d",
+      "name": "Laba (rugi) per saham dasar dari operasi yang dilanjutkan",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 119000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 352000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 235000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 115000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 333000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 218000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 295000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 196000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 27
+    },
+    {
+      "id": "1ef123d2bbf0a231ebdd2ad294810ca6",
+      "name": "Laba (rugi) per saham dilusian dari operasi yang dilanjutkan",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 119000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 352000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 235000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 115000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 333000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 218000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 295000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 196000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 28
+    },
+    {
+      "id": "811b2c424a6842594804d8caa4757ea1",
+      "name": "Penyesuaian lainnya atas pendapatan komprehensif lainnya yang akan direklasifikasi ke laba rugi, sebelum pajak",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 89034000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": -1385000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": -1385000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": 0,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 32
+    },
+    {
+      "id": "9cea24269aa06e8569548749ebeb10f5",
+      "name": "Beban provisi dan komisi",
+      "level": 0,
+      "values": [
+        {
+          "col": "Q1 2026",
+          "year": 2026,
+          "amount": 500000000,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q2"
+        },
+        {
+          "col": "Q1 2025",
+          "year": 2025,
+          "amount": 0,
+          "period": "Q1"
+        },
+        {
+          "col": "Q3 2024",
+          "year": 2024,
+          "amount": 3000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2024",
+          "year": 2024,
+          "amount": 195000000,
+          "period": "Q2"
+        },
+        {
+          "col": "Q3 2023",
+          "year": 2023,
+          "amount": -352000000,
+          "period": "Q3"
+        },
+        {
+          "col": "Q2 2023",
+          "year": 2023,
+          "amount": -258000000,
+          "period": "Q2"
+        }
+      ],
+      "parent_id": null,
+      "is_abstract": false,
+      "display_order": 57
+    }
+  ],
+  "columns": [
+    {
+      "year": 2026,
+      "label": "Q1 2026",
+      "period": "Q1"
+    },
+    {
+      "year": 2025,
+      "label": "Q3 2025",
+      "period": "Q3"
+    },
+    {
+      "year": 2025,
+      "label": "Q2 2025",
+      "period": "Q2"
+    },
+    {
+      "year": 2025,
+      "label": "Q1 2025",
+      "period": "Q1"
+    },
+    {
+      "year": 2024,
+      "label": "Q3 2024",
+      "period": "Q3"
+    },
+    {
+      "year": 2024,
+      "label": "Q2 2024",
+      "period": "Q2"
+    },
+    {
+      "year": 2023,
+      "label": "Q3 2023",
+      "period": "Q3"
+    },
+    {
+      "year": 2023,
+      "label": "Q2 2023",
+      "period": "Q2"
+    }
+  ]
+}

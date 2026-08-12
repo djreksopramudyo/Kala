@@ -1,0 +1,10 @@
+yfinance
+pandas
+requests
+beautifulsoup4
+textblob
+numpy
+deep-translator
+lxml
+pyportfolioopt
+praw

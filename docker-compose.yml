@@ -1,0 +1,50 @@
+# Generic compose file for the Kala Telegram bot + daily cycle.
+#
+# What's generic: the two services, the bind-mount pattern for persisting
+# state, and the restart policy tied to the Dockerfile's HEALTHCHECK. What
+# is NOT here, on purpose: a reverse proxy, TLS, host firewall rules, a
+# specific backup destination, or resource limits tuned to a real VPS's
+# spec -- fill those in for your actual server (see DOCKER.md).
+#
+# Secrets: create a `.env` file (NOT committed -- see .dockerignore/.gitignore)
+# with KALA_TELEGRAM_TOKEN=... and KALA_TELEGRAM_CHAT_ID=...
+# (same env vars DEPLOY_VPS.md's systemd setup uses, so the two deployment
+# paths are interchangeable).
+
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./paper_state.json:/app/paper_state.json
+      - ./runner_config.json:/app/runner_config.json
+      - ./results:/app/results
+    command: ["python", "telegram_bot.py"]
+
+  # The 17:00 WIB daily cycle (scan + manage exits + notify), run once per
+  # day rather than as a long-lived process. `sleep` + loop is the simplest
+  # thing that works in a container without adding a cron daemon; swap for
+  # a real cron image or your orchestrator's own scheduling if you have one.
+  daily:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./paper_state.json:/app/paper_state.json
+      - ./runner_config.json:/app/runner_config.json
+      - ./results:/app/results
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        while true; do
+          now_wib_hour=$$(TZ=Asia/Jakarta date +%H)
+          now_wib_minute=$$(TZ=Asia/Jakarta date +%M)
+          if [ "$$now_wib_hour" = "17" ] && [ "$$now_wib_minute" = "00" ]; then
+            python daily_run.py
+            sleep 60
+          fi
+          sleep 30
+        done
