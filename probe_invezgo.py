@@ -32,7 +32,7 @@ OUT_DIR = Path("results")
 def _dump(name: str, payload) -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     path = OUT_DIR / f"invezgo_probe_{name}.json"
-    path.write_text(json.dumps(payload, indent=2))
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     shape = (f"array of {len(payload)} item(s)" if isinstance(payload, list)
              else f"object with keys {list(payload.keys())}"
              if isinstance(payload, dict) else type(payload).__name__)

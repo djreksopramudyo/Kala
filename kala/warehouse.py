@@ -50,6 +50,18 @@ CREATE TABLE IF NOT EXISTS bars (
     PRIMARY KEY (ticker, date)
 );
 CREATE INDEX IF NOT EXISTS idx_bars_ticker_date ON bars(ticker, date);
+
+-- Records that a fetch was ATTEMPTED, and the newest bar it could obtain.
+-- Without this the cache cannot tell "never fetched" from "fetched, and this
+-- is all that exists" — so a delisted or suspended ticker, whose newest bar is
+-- permanently old, fails every freshness test and is re-downloaded on every
+-- single run, forever. Same failure shape as an archive that creates itself:
+-- an absence of data reads identically to an absence of effort.
+CREATE TABLE IF NOT EXISTS fetch_attempts (
+    ticker      TEXT NOT NULL PRIMARY KEY,
+    attempted   TEXT NOT NULL,   -- ISO YYYY-MM-DD, when we last asked
+    newest_bar  TEXT             -- newest date the source returned, NULL if none
+);
 """
 
 _COLUMNS = ("Open", "High", "Low", "Close", "Volume")
@@ -128,6 +140,44 @@ class Warehouse:
     def tickers(self) -> list[str]:
         with self._connect() as conn:
             return sorted(r[0] for r in conn.execute("SELECT DISTINCT ticker FROM bars"))
+
+    def record_fetch_attempt(self, ticker: str, attempted: str,
+                             newest_bar: str | None) -> None:
+        """Remember that ``ticker`` was asked for on ``attempted``, and the
+        newest bar the source could supply (None if it supplied nothing)."""
+        with self._connect() as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO fetch_attempts (ticker, attempted, newest_bar) "
+                "VALUES (?, ?, ?)", (ticker, attempted, newest_bar))
+
+    def fetch_attempt(self, ticker: str) -> tuple[str, str | None] | None:
+        """(attempted_date, newest_bar) for ``ticker``, or None if never asked."""
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT attempted, newest_bar FROM fetch_attempts WHERE ticker = ?",
+                (ticker,)).fetchone()
+        return (row[0], row[1]) if row else None
+
+    def is_as_fresh_as_it_gets(self, ticker: str, today: str) -> bool:
+        """True when we already asked for ``ticker`` TODAY and the source had
+        nothing newer than what is stored.
+
+        This is what stops a permanently-stale ticker (delisted, suspended, or
+        simply not trading) from being re-downloaded on every run: its newest
+        bar can never satisfy a freshness test written against the calendar, but
+        asking again the same day cannot produce a different answer.
+        """
+        rec = self.fetch_attempt(ticker)
+        if rec is None:
+            return False
+        attempted, newest = rec
+        if attempted != today:
+            return False
+        covered = self.covered_range(ticker)
+        if covered is None:
+            # asked today, source returned nothing, and nothing is stored
+            return newest is None
+        return newest is not None and newest <= covered[1]
 
     def get_or_fetch(self, ticker: str, start: str, end: str, fetch_fn) -> pd.DataFrame | None:
         """The main entry point for research code: return [start, end] for

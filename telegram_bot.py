@@ -307,19 +307,19 @@ def chunk(text: str, size: int = MAX_MSG) -> list[str]:
 # =========================================================================
 
 def load_config() -> dict:
-    return json.loads(CONFIG_PATH.read_text())
+    return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 
 
 def save_capital(amount: float) -> None:
     cfg = load_config()
     cfg["daily_capital_idr"] = float(amount)
-    CONFIG_PATH.write_text(json.dumps(cfg, indent=2))
+    CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
 
 
 def save_max_positions(n: int) -> None:
     cfg = load_config()
     cfg["max_positions"] = int(n)
-    CONFIG_PATH.write_text(json.dumps(cfg, indent=2))
+    CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
 
 
 # =========================================================================
@@ -451,6 +451,35 @@ def _benchmark_window_return(days: int) -> float | None:
         return None
 
 
+def _entry_atr(ticker: str) -> float | None:
+    """ATR at entry, so the stop can be sized to the stock's own volatility.
+
+    Without this the stop ladder degrades SILENTLY. ``exits.governing_stop``
+    treats a missing ATR as "fall back to the hard floor", so a position opened
+    without one gets a flat ``hard_stop_pct`` no matter how volatile it is, and
+    ``atr_stop_multiple`` never binds. Nothing in the output distinguishes that
+    from a deliberately flat stop, which is why every manually opened position
+    ran on the floor without anyone noticing.
+
+    Returns None if there isn't enough history to compute it — the caller
+    reports that, rather than passing a silent None down to the stop logic.
+    """
+    import math
+
+    import kala_daily_trader as dt
+    from kala import indicators as ind
+    try:
+        d = dt.download_stock_data(ticker, dt.START_DATE, dt.END_DATE)
+        if d is None or len(d) < 20:
+            return None
+        val = float(ind.atr(d["High"], d["Low"], d["Close"], 14).iloc[-1])
+        return val if math.isfinite(val) and val > 0 else None
+    except Exception as e:
+        from kala.logging_util import log_swallowed
+        log_swallowed(f"_entry_atr({ticker})", e)
+    return None
+
+
 def _last_close(ticker: str) -> float | None:
     """Today's close for a ticker, or None if unavailable.
 
@@ -523,12 +552,22 @@ def cmd_buy(arg: str) -> str:
     pt = PaperTrader.load(STATE_PATH, cfg.get("start_capital_idr", 10_000_000),
                           charge_manual_costs=_charge_manual_costs(cfg))
     was_held = ticker in pt.positions
+    # Size the stop to THIS stock's volatility. Omitting it silently pins every
+    # position to the flat hard floor (see _entry_atr).
+    entry_atr = _entry_atr(ticker)
     try:
-        fill = pt.manual_buy(ticker, shares, price, date=trade_date)
+        fill = pt.manual_buy(ticker, shares, price, date=trade_date, atr=entry_atr)
     except ValueError as e:
         return f"⚠️ {md_escape(e)}"
 
     when = f" on {trade_date}" if trade_date else ""
+    # A position opened without an ATR runs on the flat hard floor rather than a
+    # volatility-sized stop. That is a real difference in how it will be managed,
+    # so say it here instead of letting it pass as normal.
+    atr_line = ""
+    if entry_atr is None:
+        atr_line = ("⚠️ No ATR available for this ticker — its stop will use the "
+                    "flat floor instead of being sized to its volatility.\n")
     # Show what the costs did. Quoting only the raw price would hide why cash
     # dropped by more than price x shares.
     costs_line = ""
@@ -538,13 +577,13 @@ def cmd_buy(arg: str) -> str:
     if was_held:
         pos = pt.positions[ticker]
         return (f"✅ Added to {ticker}: +{shares:,} sh @ {price_idr(price)}{when}.\n"
-                f"{costs_line}"
+                f"{costs_line}{atr_line}"
                 f"New position: {pos.shares:,} sh @ avg {price_idr(pos.entry_price)} "
                 f"(blended cost basis — the stop/target now measure from this, "
                 f"not your original entry).\n"
                 f"Cash left: {idr(pt.cash)}. Wrong number? /undo")
     return (f"✅ Recorded BUY {ticker}: {shares:,} sh @ {price_idr(price)}{when} "
-            f"(≈ {idr(fill * shares)}).\n{costs_line}Cash left: {idr(pt.cash)}.\n"
+            f"(≈ {idr(fill * shares)}).\n{costs_line}{atr_line}Cash left: {idr(pt.cash)}.\n"
             f"Send /review anytime and I'll manage the stop for you. Wrong number? /undo")
 
 
@@ -799,7 +838,7 @@ def cmd_deposit(arg: str) -> str:
     cfg = load_config()
     cfg["start_capital_idr"] = pt.start_capital
     cfg["daily_capital_idr"] = pre_daily_capital + amount
-    CONFIG_PATH.write_text(json.dumps(cfg, indent=2))
+    CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
 
     return (f"✅ Deposited {idr(amount)}.\n"
             f"Cash now: {idr(pt.cash)}. Starting capital adjusted to "
@@ -867,7 +906,7 @@ def cmd_friction(arg: str = "") -> str:
     from kala.config import CostModel
     from kala.friction import format_friction, friction_report
 
-    raw = json.loads(STATE_PATH.read_text()) if STATE_PATH.exists() else {}
+    raw = json.loads(STATE_PATH.read_text(encoding="utf-8")) if STATE_PATH.exists() else {}
     if not raw.get("positions") and not raw.get("log"):
         return "No trades recorded yet — nothing to cost."
 
@@ -979,7 +1018,7 @@ def _sync_config_for_deposit_undo(pt, info: dict, redo: bool) -> None:
     cfg = load_config()
     cfg["start_capital_idr"] = pt.start_capital
     cfg["daily_capital_idr"] = pre + info["amount"] if redo else pre
-    CONFIG_PATH.write_text(json.dumps(cfg, indent=2))
+    CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
 
 
 def cmd_undo() -> str:
@@ -1206,6 +1245,10 @@ def cmd_performance(arg: str = "") -> str:
     lines.append(f"🟢 ACTIVE: {len(held)} open position(s)"
                 + (f" — {', '.join(t.split('.')[0] for t in held)}" if held else ""))
 
+    if r.get("skipped_unparseable"):
+        lines.append(f"\n⚠️ {r['skipped_unparseable']} closed trade(s) have an "
+                    f"unreadable date and are in NONE of the figures below — "
+                    f"the win rate is computed on an incomplete log.")
     if r["n"] == 0:
         lines.append(f"\nNo closed trades in the last {days} day(s).")
     else:
@@ -1461,7 +1504,15 @@ def _rank_new_buys(cfg: dict, pt) -> dict:
         if t in held:
             candidates.append({"ticker": t, "kind": "held", "score": score})
             continue
-        if shown >= slots and slots > 0:
+        # NOT `and slots > 0`. /maxpositions rejects n <= 0, so slots == 0 can
+        # only mean "already at or over the cap" — never "unlimited". With that
+        # clause the guard switched OFF precisely when it was binding: an
+        # account holding 17 positions against a cap of 10 had slots == 0, the
+        # condition was False for every candidate, and the scan proposed the
+        # entire buy list while the user was seven positions over their own
+        # limit. A cap that stops applying when exceeded is worse than no cap,
+        # because the report still prints the limit.
+        if shown >= slots:
             candidates.append({"ticker": t, "kind": "over_cap", "score": score})
             continue
         atr_val = s.get("atr")
@@ -1541,6 +1592,28 @@ def _format_scan_candidate(c: dict, risk_cfg) -> str:
             f"    reason: {c.get('reason', 'n/a')}")
 
 
+def position_cap_notice(slots: int, held: int, max_pos: int,
+                        n_signals: int) -> str | None:
+    """Text shown when the account is at or over its position cap, else None.
+
+    Pure so it can be tested by CALLING it. An earlier version of this lived
+    inline in cmd_scan and was covered only by a source-text assertion, which
+    passed happily when the whole block was made unreachable.
+
+    Withholding every candidate SILENTLY would trade one invisible failure for
+    another: an empty candidate list reads as "no signals today", when in fact
+    the scan found signals and suppressed them. The count is stated so those
+    two situations cannot be confused.
+    """
+    if slots > 0:
+        return None
+    return (f"\n🛑 *At the position cap* — {held} open vs a limit of {max_pos}. "
+            f"No new buys are proposed until you are back under it.\n"
+            f"Close something, or raise the limit with /maxpositions.\n"
+            f"({n_signals} BUY signal(s) today, all withheld — this is NOT "
+            f"'no signals'.)")
+
+
 def cmd_scan(inline_capital: str | None = None) -> str:
     """Read-only: rank today's BUYs and size the top names to the budget.
     Does NOT change paper state (that's /run)."""
@@ -1571,8 +1644,16 @@ def cmd_scan(inline_capital: str | None = None) -> str:
         header.append("\nNo BUY signals today. Sitting in cash is a position too.")
         return "\n".join(header)
 
+    cap_notice = position_cap_notice(r["slots"], len(r["held"]), r["max_pos"],
+                                     len(r["buys"]))
+    if cap_notice:
+        header.append(cap_notice)
+        return "\n".join(header)
+
+    # `or len(r['buys'])` would turn a legitimate 0 into the full count — the
+    # same inversion as the slots guard above. Handled by the early return.
     lines = [*header, f"\n🎯 Top BUY candidates "
-             f"({min(r['slots'], len(r['buys'])) or len(r['buys'])} shown):"]
+             f"({min(r['slots'], len(r['buys']))} shown):"]
     for c in r["candidates"]:
         if c["kind"] == "invalid":
             continue
@@ -1631,7 +1712,7 @@ def _evaluate_holdings(pt, cfg: dict) -> dict:
     populated when relevant."""
     import kala_daily_trader as dt
     from kala.live import evaluate_position
-    from kala.papertrade import _bars_held
+    from kala.papertrade import bars_held_or_reason
 
     allocation = float(cfg.get("daily_capital_idr", 5_000_000))
     max_pos = int(cfg.get("max_positions", 5))
@@ -1681,11 +1762,17 @@ def _evaluate_holdings(pt, cfg: dict) -> dict:
         # as HOLD right up until the EOD run sells it. Never DOWNGRADES an
         # existing URGENT/CONSIDER verdict, same "urgency never downgrades"
         # rule the exit engine itself uses.
-        bars_held = _bars_held(pos.entry_date, h)
+        bars_held, held_why = bars_held_or_reason(pos.entry_date, h)
         max_days = pt.cfg.backtest.holding_max_days
         if urgency == "NONE" and bars_held is not None and bars_held >= max_days:
             urgency = "CONSIDER"
             reason = f"max holding period ({bars_held} bars >= {max_days})"
+        elif urgency == "NONE" and bars_held is None:
+            # Not a downgrade and not an upgrade — a statement that one rule
+            # did not run. Printing a bare HOLD here is how a position with no
+            # working exit rule reads as a position with nothing to do, which
+            # is the shape of every finding in this audit.
+            reason = f"max-holding rule NOT checked — {held_why}"
 
         trim_suggestion = None
         if urgency == "CONSIDER" and reason and "target profit" in reason:

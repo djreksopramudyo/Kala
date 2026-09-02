@@ -135,7 +135,7 @@ def test_cmd_editentry_error_message_is_escaped(monkeypatch, tmp_path):
     """A real call site: /editentry on an unheld ticker returns a ValueError
     string through the exact f"⚠️ {md_escape(e)}" path."""
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -177,7 +177,7 @@ def test_cmd_buy_reply_preserves_decimal_price(monkeypatch, tmp_path):
     """End-to-end: a decimal price typed into /buy must appear UNROUNDED in
     the bot's own reply, not just in the stored state."""
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -189,7 +189,7 @@ def test_cmd_buy_reply_preserves_decimal_price(monkeypatch, tmp_path):
 
 def test_cmd_editentry_reply_preserves_decimal_price(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -203,7 +203,7 @@ def test_cmd_buy_reply_still_clean_for_whole_prices(monkeypatch, tmp_path):
     """No regression for the common case: a whole-number price must not
     grow a spurious '.00'."""
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -252,7 +252,7 @@ def test_split_trade_date(arg, expected_rest, expected_date):
 def test_cmd_buy_backdates_with_at_date(monkeypatch, tmp_path):
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -265,7 +265,7 @@ def test_cmd_buy_backdates_with_at_date(monkeypatch, tmp_path):
 
 def test_cmd_buy_rejects_unparseable_date(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -277,7 +277,7 @@ def test_cmd_buy_rejects_unparseable_date(monkeypatch, tmp_path):
 
 def test_cmd_buy_rejects_future_date(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -289,7 +289,7 @@ def test_cmd_buy_rejects_future_date(monkeypatch, tmp_path):
 def test_cmd_buy_without_at_date_uses_today(monkeypatch, tmp_path):
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -302,7 +302,7 @@ def test_cmd_buy_without_at_date_uses_today(monkeypatch, tmp_path):
 def test_cmd_sell_backdates_with_at_date(monkeypatch, tmp_path):
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -319,7 +319,7 @@ def test_cmd_sell_rejects_date_before_entry(monkeypatch, tmp_path):
     -- it would otherwise log a negative hold time that /edge silently
     averages into avg_hold_days."""
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -336,7 +336,7 @@ def test_cmd_sell_rejects_date_before_entry(monkeypatch, tmp_path):
 def test_cmd_editentry_corrects_price_and_reconciles_cash(monkeypatch, tmp_path):
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -358,7 +358,7 @@ def test_cmd_editentry_corrects_price_and_reconciles_cash(monkeypatch, tmp_path)
 
 def test_cmd_editentry_on_unheld_ticker_shows_clear_error(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -369,7 +369,7 @@ def test_cmd_editentry_on_unheld_ticker_shows_clear_error(monkeypatch, tmp_path)
 
 def test_cmd_editentry_missing_args_shows_usage(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -381,7 +381,7 @@ def test_cmd_editentry_missing_args_shows_usage(monkeypatch, tmp_path):
 def test_cmd_editentry_is_reachable_via_dispatch(monkeypatch, tmp_path):
     """The command must actually be wired into the router, not just defined."""
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -394,7 +394,7 @@ def test_cmd_editentry_is_reachable_via_dispatch(monkeypatch, tmp_path):
 
 def test_cmd_editentry_is_undoable_via_dispatch(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -412,7 +412,7 @@ def test_cmd_editentry_is_undoable_via_dispatch(monkeypatch, tmp_path):
 def test_cmd_sell_partial_keeps_remainder_open(monkeypatch, tmp_path):
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -430,7 +430,7 @@ def test_cmd_sell_full_two_token_form_still_works(monkeypatch, tmp_path):
     the WHOLE position, exactly as before partial sell was added."""
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -444,7 +444,7 @@ def test_cmd_sell_full_two_token_form_still_works(monkeypatch, tmp_path):
 def test_cmd_sell_partial_accepts_decimal_price(monkeypatch, tmp_path):
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -461,7 +461,7 @@ def test_cmd_sell_partial_accepts_decimal_price(monkeypatch, tmp_path):
 
 def test_cmd_history_lists_recent_trades_most_recent_first(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -479,7 +479,7 @@ def test_cmd_history_lists_recent_trades_most_recent_first(monkeypatch, tmp_path
 
 def test_cmd_history_respects_n_and_caps_at_50(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 100_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 100_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -494,7 +494,7 @@ def test_cmd_history_respects_n_and_caps_at_50(monkeypatch, tmp_path):
 
 def test_cmd_history_with_no_trades(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -510,7 +510,7 @@ def test_dispatch_routes_history_and_aliases(monkeypatch):
 
 def test_cmd_edge_with_no_trades(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -525,7 +525,7 @@ def test_cmd_edge_unvalidated_by_default(monkeypatch, tmp_path):
     based on. /edge must say so plainly, not silently fall back to
     comparing against a baseline that's under active dispute."""
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -544,7 +544,7 @@ def test_cmd_edge_validated_when_overridden(monkeypatch, tmp_path):
     column, not say UNVALIDATED."""
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
-                                   "edge_expectations": {"validated": True}}))
+                                   "edge_expectations": {"validated": True}}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -561,7 +561,7 @@ def test_cmd_edge_validated_when_overridden(monkeypatch, tmp_path):
 def test_cmd_edge_small_sample_reads_too_early(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
-                                   "edge_expectations": {"validated": True}}))
+                                   "edge_expectations": {"validated": True}}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -583,7 +583,7 @@ def test_cmd_edge_respects_config_expectations(monkeypatch, tmp_path):
     backtest column shows the overridden EV, not the built-in default."""
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
-                                   "edge_expectations": {"ev_pct": 9.99}}))
+                                   "edge_expectations": {"ev_pct": 9.99}}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -603,7 +603,7 @@ def test_dispatch_routes_edge_and_aliases(monkeypatch):
 
 def test_cmd_checkstop_no_positions(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -615,7 +615,7 @@ def test_cmd_checkstop_reports_stop_hit(monkeypatch, tmp_path):
     from kala.intraday import Quote
 
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     _seed_positions_state(statefile, ["ANTM.JK"])
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
@@ -635,7 +635,7 @@ def test_cmd_checkstop_reports_take_profit(monkeypatch, tmp_path):
     from kala.intraday import Quote
 
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     _seed_positions_state(statefile, ["ANTM.JK"])
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
@@ -653,7 +653,7 @@ def test_cmd_checkstop_all_clear(monkeypatch, tmp_path):
     from kala.intraday import Quote
 
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     _seed_positions_state(statefile, ["ANTM.JK"])
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
@@ -673,7 +673,7 @@ def test_cmd_checkstop_lists_every_position_sorted_by_closest_to_stop(monkeypatc
     from kala.intraday import Quote
 
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     _seed_positions_state(statefile, ["SAFE.JK", "CLOSE.JK"])
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
@@ -700,7 +700,7 @@ def test_cmd_checkstop_shows_target_and_flags_when_reached(monkeypatch, tmp_path
     from kala.intraday import Quote
 
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     _seed_positions_state(statefile, ["WINNER.JK"])
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
@@ -721,7 +721,7 @@ def test_cmd_checkstop_handles_missing_quote(monkeypatch, tmp_path):
     import intraday_watch
 
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     _seed_positions_state(statefile, ["ANTM.JK"])
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
@@ -758,7 +758,7 @@ def test_calendar_days_held():
 
 def test_cmd_positions_shows_days_held(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -803,52 +803,52 @@ def test_chunk_never_empty():
 
 def test_save_capital_persists(tmp_path, monkeypatch):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"daily_capital_idr": 1, "max_positions": 5}))
+    cfgfile.write_text(json.dumps({"daily_capital_idr": 1, "max_positions": 5}), encoding="utf-8")
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     tb.save_capital(7_000_000)
-    on_disk = json.loads(cfgfile.read_text())
+    on_disk = json.loads(cfgfile.read_text(encoding="utf-8"))
     assert on_disk["daily_capital_idr"] == 7_000_000
     assert on_disk["max_positions"] == 5   # other keys preserved
 
 
 def test_cmd_capital_updates_and_confirms(tmp_path, monkeypatch):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"daily_capital_idr": 1}))
+    cfgfile.write_text(json.dumps({"daily_capital_idr": 1}), encoding="utf-8")
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     reply = tb.cmd_capital("5jt")
     assert "5,000,000" in reply
-    assert json.loads(cfgfile.read_text())["daily_capital_idr"] == 5_000_000
+    assert json.loads(cfgfile.read_text(encoding="utf-8"))["daily_capital_idr"] == 5_000_000
 
 
 def test_cmd_capital_rejects_bad_input(tmp_path, monkeypatch):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"daily_capital_idr": 1}))
+    cfgfile.write_text(json.dumps({"daily_capital_idr": 1}), encoding="utf-8")
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     reply = tb.cmd_capital("banana")
     assert "Couldn't read" in reply
-    assert json.loads(cfgfile.read_text())["daily_capital_idr"] == 1  # unchanged
+    assert json.loads(cfgfile.read_text(encoding="utf-8"))["daily_capital_idr"] == 1  # unchanged
 
 
 # ---------------- /maxpositions ----------------
 
 def test_cmd_maxpositions_updates_and_shows_per_slot_cap(tmp_path, monkeypatch):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"daily_capital_idr": 30_000_000, "max_positions": 30}))
+    cfgfile.write_text(json.dumps({"daily_capital_idr": 30_000_000, "max_positions": 30}), encoding="utf-8")
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     reply = tb.cmd_maxpositions("10")
     assert "max_positions set to 10" in reply
     assert "3,000,000" in reply           # 30,000,000 / 10 per-slot cap shown
-    assert json.loads(cfgfile.read_text())["max_positions"] == 10
+    assert json.loads(cfgfile.read_text(encoding="utf-8"))["max_positions"] == 10
 
 
 def test_cmd_maxpositions_rejects_non_positive(tmp_path, monkeypatch):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"max_positions": 5}))
+    cfgfile.write_text(json.dumps({"max_positions": 5}), encoding="utf-8")
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     for bad in ("0", "-3", "banana", ""):
         reply = tb.cmd_maxpositions(bad)
         assert "Usage" in reply or "must be positive" in reply
-    assert json.loads(cfgfile.read_text())["max_positions"] == 5   # unchanged
+    assert json.loads(cfgfile.read_text(encoding="utf-8"))["max_positions"] == 5   # unchanged
 
 
 def test_dispatch_routes_maxpositions_and_aliases(monkeypatch):
@@ -860,7 +860,7 @@ def test_dispatch_routes_maxpositions_and_aliases(monkeypatch):
 
 def test_cmd_performance_shows_win_loss_and_net_pnl(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -879,7 +879,7 @@ def test_cmd_performance_shows_win_loss_and_net_pnl(monkeypatch, tmp_path):
 
 def test_cmd_performance_shows_benchmark_when_available(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -894,7 +894,7 @@ def test_cmd_performance_shows_benchmark_when_available(monkeypatch, tmp_path):
 
 def test_cmd_performance_omits_benchmark_when_unavailable(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -909,7 +909,7 @@ def test_cmd_performance_omits_benchmark_when_unavailable(monkeypatch, tmp_path)
 
 def test_cmd_performance_shows_active_positions(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -923,7 +923,7 @@ def test_cmd_performance_shows_active_positions(monkeypatch, tmp_path):
 
 def test_cmd_performance_no_trades_message(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -935,7 +935,7 @@ def test_cmd_performance_no_trades_message(monkeypatch, tmp_path):
 
 def test_cmd_performance_respects_days_arg(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -958,7 +958,7 @@ def test_cmd_status_shows_max_positions_and_per_slot_cap(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
                                    "daily_capital_idr": 10_000_000,
-                                   "max_positions": 20}))
+                                   "max_positions": 20}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -974,7 +974,7 @@ def test_cmd_status_shows_dividends_when_present(monkeypatch, tmp_path):
     import kala_daily_trader as dt
 
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -990,7 +990,7 @@ def test_cmd_status_omits_dividend_line_when_none_recorded(monkeypatch, tmp_path
     from kala.papertrade import PaperTrader
 
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1069,7 +1069,7 @@ def test_dispatch_routes_buy_sell_positions(monkeypatch):
 def test_cmd_buy_usage_and_bad_shares(monkeypatch, tmp_path):
     import json
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     assert "Usage" in tb.cmd_buy("ANTM")              # too few args
     assert "Couldn't read shares" in tb.cmd_buy("ANTM abc 1500")
@@ -1080,7 +1080,7 @@ def test_cmd_buy_and_sell_end_to_end(monkeypatch, tmp_path):
 
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1105,7 +1105,7 @@ def _reset_env(tmp_path, monkeypatch, start_capital=10_000_000):
     import json
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": start_capital,
-                                   "daily_capital_idr": 999_999_999}))
+                                   "daily_capital_idr": 999_999_999}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1115,11 +1115,11 @@ def _reset_env(tmp_path, monkeypatch, start_capital=10_000_000):
 def test_reset_without_confirm_shows_warning_and_touches_nothing(monkeypatch, tmp_path):
     cfgfile, statefile = _reset_env(tmp_path, monkeypatch)
     tb.cmd_buy("ANTM 200 1500")
-    before = statefile.read_text()
+    before = statefile.read_text(encoding="utf-8")
 
     r = tb.cmd_reset("")
     assert "confirm" in r.lower() and "ANTM.JK" in r
-    assert statefile.read_text() == before, "plain /reset must not touch state"
+    assert statefile.read_text(encoding="utf-8") == before, "plain /reset must not touch state"
     assert not list(tmp_path.glob("paper_state_backup_*.json")), "no backup without confirm either"
 
 
@@ -1136,7 +1136,7 @@ def test_reset_confirm_wipes_state_and_backs_up(monkeypatch, tmp_path):
     assert pt.cash == pytest.approx(10_000_000)     # kept the existing start_capital_idr
     backups = list(tmp_path.glob("paper_state_backup_*.json"))
     assert len(backups) == 1
-    assert "ANTM.JK" in backups[0].read_text()       # the lost position is recoverable on disk
+    assert "ANTM.JK" in backups[0].read_text(encoding="utf-8")       # the lost position is recoverable on disk
 
 
 def test_reset_confirm_with_amount_changes_capital_and_syncs_config(monkeypatch, tmp_path):
@@ -1149,7 +1149,7 @@ def test_reset_confirm_with_amount_changes_capital_and_syncs_config(monkeypatch,
     assert "Reset done" in r and "5" in r
     pt = PaperTrader.load(statefile)
     assert pt.cash == pytest.approx(5_000_000) and pt.start_capital == pytest.approx(5_000_000)
-    cfg = json.loads(cfgfile.read_text())
+    cfg = json.loads(cfgfile.read_text(encoding="utf-8"))
     assert cfg["start_capital_idr"] == 5_000_000
     assert cfg["daily_capital_idr"] == 5_000_000     # the 999,999,999 mismatch is gone
 
@@ -1157,11 +1157,11 @@ def test_reset_confirm_with_amount_changes_capital_and_syncs_config(monkeypatch,
 def test_reset_confirm_bad_amount_does_not_touch_state(monkeypatch, tmp_path):
     cfgfile, statefile = _reset_env(tmp_path, monkeypatch)
     tb.cmd_buy("ANTM 200 1500")
-    before = statefile.read_text()
+    before = statefile.read_text(encoding="utf-8")
 
     r = tb.cmd_reset("confirm not-a-number")
     assert "Couldn't read an amount" in r
-    assert statefile.read_text() == before
+    assert statefile.read_text(encoding="utf-8") == before
 
 
 def test_reset_no_prior_state_is_safe(monkeypatch, tmp_path):
@@ -1197,7 +1197,7 @@ def test_cmd_buy_add_to_held_position_blends_and_reports_new_avg(monkeypatch, tm
 
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1220,7 +1220,7 @@ def test_cmd_deposit_raises_cash_start_capital_and_daily_budget(monkeypatch, tmp
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
-                                   "daily_capital_idr": 5_000_000}))
+                                   "daily_capital_idr": 5_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1230,7 +1230,7 @@ def test_cmd_deposit_raises_cash_start_capital_and_daily_budget(monkeypatch, tmp
     pt = PaperTrader.load(statefile)
     assert pt.cash == pytest.approx(15_000_000)
     assert pt.start_capital == pytest.approx(15_000_000)
-    cfg = json.loads(cfgfile.read_text())
+    cfg = json.loads(cfgfile.read_text(encoding="utf-8"))
     assert cfg["start_capital_idr"] == pytest.approx(15_000_000)
     assert cfg["daily_capital_idr"] == pytest.approx(10_000_000)   # 5jt + 5jt deposit
 
@@ -1238,7 +1238,7 @@ def test_cmd_deposit_raises_cash_start_capital_and_daily_budget(monkeypatch, tmp
 def test_cmd_deposit_rejects_bad_amount(monkeypatch, tmp_path):
     import json
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1253,7 +1253,7 @@ def test_cmd_dividend_raises_cash_not_start_capital(monkeypatch, tmp_path):
 
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1271,7 +1271,7 @@ def test_cmd_dividend_supports_backdating(monkeypatch, tmp_path):
 
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1285,7 +1285,7 @@ def test_cmd_dividend_supports_backdating(monkeypatch, tmp_path):
 def test_cmd_dividend_rejects_bad_amount(monkeypatch, tmp_path):
     import json
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1304,7 +1304,7 @@ def test_cmd_dividend_normalizes_us_sharia_ticker(monkeypatch, tmp_path):
 
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1317,7 +1317,7 @@ def test_cmd_dividend_normalizes_us_sharia_ticker(monkeypatch, tmp_path):
 def test_dispatch_routes_dividend_command(monkeypatch, tmp_path):
     import json
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1330,7 +1330,7 @@ def test_cmd_undo_reverts_dividend(monkeypatch, tmp_path):
 
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1347,7 +1347,7 @@ def test_cmd_undo_reverts_dividend(monkeypatch, tmp_path):
 
 def test_cmd_rebalance_needs_target_allocation(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))   # no target
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")   # no target
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", tmp_path / "paper_state.json")
     r = tb.cmd_rebalance("")
@@ -1361,7 +1361,7 @@ def test_cmd_rebalance_noop_when_on_target(monkeypatch, tmp_path):
     cfgfile.write_text(json.dumps({
         "start_capital_idr": 10_000_000,
         "target_allocation": {"ANTM.JK": 50, "BBCA.JK": 50},
-    }))
+    }), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1369,9 +1369,9 @@ def test_cmd_rebalance_noop_when_on_target(monkeypatch, tmp_path):
     # the pot, within band -> no-op. (Start capital sized so the two buys
     # consume nearly all of it; leftover cash is a tiny buffer.)
     monkeypatch.setattr(tb, "_last_close", lambda t: 100.0)
-    cfg = json.loads(cfgfile.read_text())
+    cfg = json.loads(cfgfile.read_text(encoding="utf-8"))
     cfg["start_capital_idr"] = 201_000
-    cfgfile.write_text(json.dumps(cfg))
+    cfgfile.write_text(json.dumps(cfg), encoding="utf-8")
     pt = PaperTrader.load(statefile, start_capital=201_000)
     pt.manual_buy("ANTM.JK", 1000, 100.0)
     pt.manual_buy("BBCA.JK", 1000, 100.0)
@@ -1386,7 +1386,7 @@ def test_cmd_rebalance_suggests_orders_when_drifted(monkeypatch, tmp_path):
     cfgfile.write_text(json.dumps({
         "start_capital_idr": 10_000_000,
         "target_allocation": {"ANTM.JK": 50, "BBCA.JK": 50},
-    }))
+    }), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1394,9 +1394,9 @@ def test_cmd_rebalance_suggests_orders_when_drifted(monkeypatch, tmp_path):
     # Size start capital so the two buys consume nearly all of it -> the pot is
     # dominated by holdings (80/20), not idle cash, isolating the pure
     # sell-the-winner / buy-the-laggard rebalance case.
-    cfg = json.loads(cfgfile.read_text())
+    cfg = json.loads(cfgfile.read_text(encoding="utf-8"))
     cfg["start_capital_idr"] = 1_010_000
-    cfgfile.write_text(json.dumps(cfg))
+    cfgfile.write_text(json.dumps(cfg), encoding="utf-8")
     pt = PaperTrader.load(statefile, start_capital=1_010_000)
     pt.manual_buy("ANTM.JK", 8000, 100.0)   # 800k -> ~79% of pot
     pt.manual_buy("BBCA.JK", 2000, 100.0)   # 200k -> ~20% of pot, badly drifted
@@ -1410,7 +1410,7 @@ def test_cmd_rebalance_suggests_orders_when_drifted(monkeypatch, tmp_path):
 
 def test_dispatch_routes_rebalance(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))   # no target
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")   # no target
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", tmp_path / "paper_state.json")
     assert "No target mix set" in tb.dispatch("/rebalance")
@@ -1425,7 +1425,7 @@ def test_cmd_undo_reverts_bad_buy(monkeypatch, tmp_path):
 
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1441,7 +1441,7 @@ def test_cmd_undo_reverts_bad_buy(monkeypatch, tmp_path):
 def test_cmd_undo_with_nothing_to_undo(monkeypatch, tmp_path):
     import json
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1453,7 +1453,7 @@ def test_cmd_redo_reapplies_undone_buy(monkeypatch, tmp_path):
 
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1476,26 +1476,26 @@ def test_cmd_undo_deposit_also_reverts_config_sync(monkeypatch, tmp_path):
     from kala.papertrade import PaperTrader
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
-                                   "daily_capital_idr": 5_000_000}))
+                                   "daily_capital_idr": 5_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
 
     tb.cmd_deposit("50jt")                # fat-fingered: meant 5jt
-    cfg_after_deposit = json.loads(cfgfile.read_text())
+    cfg_after_deposit = json.loads(cfgfile.read_text(encoding="utf-8"))
     assert cfg_after_deposit["start_capital_idr"] == pytest.approx(60_000_000)
 
     tb.cmd_undo()
     pt = PaperTrader.load(statefile)
     assert pt.cash == pytest.approx(10_000_000)
     assert pt.start_capital == pytest.approx(10_000_000)
-    cfg = json.loads(cfgfile.read_text())
+    cfg = json.loads(cfgfile.read_text(encoding="utf-8"))
     assert cfg["start_capital_idr"] == pytest.approx(10_000_000)
     assert cfg["daily_capital_idr"] == pytest.approx(5_000_000)
 
     r = tb.cmd_redo()
     assert "Redone" in r
-    cfg2 = json.loads(cfgfile.read_text())
+    cfg2 = json.loads(cfgfile.read_text(encoding="utf-8"))
     assert cfg2["start_capital_idr"] == pytest.approx(60_000_000)
     assert cfg2["daily_capital_idr"] == pytest.approx(55_000_000)
 
@@ -1509,7 +1509,7 @@ def test_cmd_undo_deposit_restores_exact_predeposit_budget_despite_intervening_c
     import json
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
-                                   "daily_capital_idr": 10_000_000}))
+                                   "daily_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1518,7 +1518,7 @@ def test_cmd_undo_deposit_restores_exact_predeposit_budget_despite_intervening_c
     tb.cmd_capital("8jt")                 # unrelated manual override: -> 8jt
     tb.cmd_undo()                         # must restore the TRUE pre-deposit value: 10jt
 
-    cfg = json.loads(cfgfile.read_text())
+    cfg = json.loads(cfgfile.read_text(encoding="utf-8"))
     assert cfg["daily_capital_idr"] == pytest.approx(10_000_000)   # not 8jt - 5jt = 3jt
     assert cfg["start_capital_idr"] == pytest.approx(10_000_000)
 
@@ -1633,12 +1633,12 @@ def _seed_positions_state(statefile, tickers):
                           "entry_atr": None} for t in tickers},
         "pending": [], "log": [], "benchmark_start": None, "capital_additions": [],
     }
-    statefile.write_text(json.dumps(payload))
+    statefile.write_text(json.dumps(payload), encoding="utf-8")
 
 
 def test_cmd_priority_orders_tiers_and_ranks_within_tier(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     _seed_positions_state(statefile, ["URG.JK", "TP.JK", "ADD.JK", "HOLD.JK", "NODATA.JK"])
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
@@ -1697,7 +1697,7 @@ def test_cmd_priority_orders_tiers_and_ranks_within_tier(monkeypatch, tmp_path):
 
 def test_cmd_priority_handles_no_positions_and_no_new_buys(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1712,7 +1712,7 @@ def test_cmd_scan_shows_entry_signal_warning_by_default(monkeypatch, tmp_path):
     import kala_daily_trader as dt
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
-                                   "daily_capital_idr": 10_000_000}))
+                                   "daily_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1729,7 +1729,7 @@ def test_cmd_scan_no_warning_once_validated(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
                                    "daily_capital_idr": 10_000_000,
-                                   "edge_expectations": {"validated": True}}))
+                                   "edge_expectations": {"validated": True}}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1743,7 +1743,7 @@ def test_cmd_scan_no_warning_once_validated(monkeypatch, tmp_path):
 
 def test_cmd_priority_shows_entry_signal_warning_on_new_buy_tier(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1758,7 +1758,7 @@ def test_cmd_priority_shows_entry_signal_warning_on_new_buy_tier(monkeypatch, tm
 def test_cmd_priority_no_warning_once_validated(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
-                                   "edge_expectations": {"validated": True}}))
+                                   "edge_expectations": {"validated": True}}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1790,7 +1790,7 @@ def test_cmd_scan_sized_candidate_includes_reason_line(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
     cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000,
                                    "daily_capital_idr": 10_000_000,
-                                   "edge_expectations": {"validated": True}}))
+                                   "edge_expectations": {"validated": True}}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1888,7 +1888,7 @@ def test_evaluate_holdings_flags_max_holding_period_as_sell(monkeypatch, tmp_pat
         "positions": {"OLD.JK": {"ticker": "OLD.JK", "entry_price": 1000.0, "shares": 100,
                                  "entry_date": entry_date, "peak_price": 1000.0, "entry_atr": None}},
         "pending": [], "log": [], "benchmark_start": None, "capital_additions": [],
-    }))
+    }), encoding="utf-8")
     cfg = Config(risk=RiskConfig(trailing_enabled=False, hard_stop_pct=-50.0,
                                  atr_stop_multiple=99.0, target_profit_pct=999.0))
     pt = PaperTrader.load(statefile, start_capital=10_000_000, cfg=cfg)
@@ -1915,7 +1915,7 @@ def test_cmd_priority_never_lists_same_ticker_in_take_profit_and_add(monkeypatch
     add_suggestion (what the pre-fix code could produce), cmd_priority's own
     tier filter must still keep it out of ADD TO WINNERS."""
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     _seed_positions_state(statefile, ["BOTH.JK"])
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
@@ -1953,7 +1953,7 @@ def test_evaluate_holdings_marks_no_data(monkeypatch, tmp_path):
 
 def test_cmd_ask_no_arg_shows_usage(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1964,7 +1964,7 @@ def test_cmd_ask_no_arg_shows_usage(monkeypatch, tmp_path):
 
 def test_cmd_ask_answers_from_real_log(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -1981,7 +1981,7 @@ def test_cmd_ask_answers_from_real_log(monkeypatch, tmp_path):
 
 def test_cmd_ask_no_matching_trades(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -2001,7 +2001,7 @@ def test_dispatch_routes_ask_and_aliases(monkeypatch):
 
 def test_build_equity_chart_png_not_enough_trades(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -2013,7 +2013,7 @@ def test_build_equity_chart_png_not_enough_trades(monkeypatch, tmp_path):
 
 def test_build_equity_chart_png_with_trades(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -2085,7 +2085,7 @@ def test_bot_send_document_posts_multipart(monkeypatch):
 
 def test_build_dashboard_document_no_positions(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -2105,7 +2105,7 @@ def test_build_dashboard_document_no_positions(monkeypatch, tmp_path):
 
 def test_build_dashboard_document_shows_dividends_when_present(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -2124,7 +2124,7 @@ def test_build_dashboard_document_flags_drift(monkeypatch, tmp_path):
     cfgfile.write_text(json.dumps({
         "start_capital_idr": 10_000_000,
         "target_allocation": {"ANTM.JK": 10.0, "BBCA.JK": 90.0},
-    }))
+    }), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -2173,7 +2173,7 @@ def test_dispatch_not_used_for_report_command_directly():
 
 def test_cmd_taxreport_shows_disclaimer_and_totals(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -2188,7 +2188,7 @@ def test_cmd_taxreport_shows_disclaimer_and_totals(monkeypatch, tmp_path):
 
 def test_cmd_taxreport_filters_by_year(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)
@@ -2200,7 +2200,7 @@ def test_cmd_taxreport_filters_by_year(monkeypatch, tmp_path):
 
 def test_cmd_taxreport_rejects_bad_year(monkeypatch, tmp_path):
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps({"start_capital_idr": 10_000_000}), encoding="utf-8")
     statefile = tmp_path / "paper_state.json"
     monkeypatch.setattr(tb, "CONFIG_PATH", cfgfile)
     monkeypatch.setattr(tb, "STATE_PATH", statefile)

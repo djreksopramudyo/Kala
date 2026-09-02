@@ -72,15 +72,29 @@ def governing_stop(entry_price: float, peak_price: float, entry_atr, cfg: RiskCo
     """
     hard = entry_price * (1.0 + cfg.hard_stop_pct / 100.0)
 
-    if _is_nan(entry_atr):
+    have_atr = not _is_nan(entry_atr)
+    if not have_atr:
         atr_stop = hard  # no ATR available -> fall back to the hard stop
     else:
         atr_stop = entry_price - cfg.atr_stop_multiple * entry_atr
 
     base = max(atr_stop, hard)  # never wider than the hard floor
 
+    # Name which rule is actually governing. "fixed/atr stop" was the same
+    # string whether ATR was used or missing, so a position running on the
+    # fallback looked identical to one whose ATR stop happened to be tighter
+    # -- and every position bought through /buy before v4.4 has entry_atr
+    # None. The volatility-scaled stop those positions are supposed to have
+    # is simply not running, and nothing said so.
+    if not have_atr:
+        base_label = "hard stop (NO ATR — fallback)"
+    elif atr_stop > hard:
+        base_label = "atr stop"
+    else:
+        base_label = "hard stop (floor; atr stop was wider)"
+
     if not cfg.trailing_enabled:
-        return base, 1, "fixed/atr stop"
+        return base, 1, base_label
 
     peak_gain = (peak_price - entry_price) / entry_price * 100.0
 
@@ -91,7 +105,7 @@ def governing_stop(entry_price: float, peak_price: float, entry_atr, cfg: RiskCo
     elif peak_gain >= cfg.breakeven_trigger_pct:
         stop, phase, label = entry_price, 2, "breakeven"
     else:
-        stop, phase, label = base, 1, "initial"
+        stop, phase, label = base, 1, base_label
 
     return max(stop, base), phase, label
 

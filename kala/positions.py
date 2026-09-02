@@ -10,6 +10,7 @@ persists ``peak_price`` so the trailing logic actually works day to day.
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -43,13 +44,25 @@ class PositionStore:
         path = Path(path)
         if not path.exists():
             return cls(path)
-        raw = json.loads(path.read_text())
+        raw = json.loads(path.read_text(encoding="utf-8"))
         positions = {t: Position(**rec) for t, rec in raw.items()}
         return cls(path, positions)
 
     def save(self) -> None:
+        """Atomic write, same tmp-then-replace discipline as paper_state.json.
+
+        ``peak_price`` is the whole reason this store exists, and it cannot be
+        recomputed after the fact from a daily run — it is a running maximum
+        accumulated across sessions. A plain ``write_text`` truncates before it
+        writes, so an interrupted save destroys exactly the state that has no
+        other source. ``os.replace`` is atomic on POSIX and Windows alike.
+        """
         data = {t: asdict(p) for t, p in self._positions.items()}
-        self.path.write_text(json.dumps(data, indent=2, sort_keys=True))
+        payload = json.dumps(data, indent=2, sort_keys=True)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = self.path.with_name(self.path.name + ".tmp")
+        tmp.write_text(payload, encoding="utf-8")
+        os.replace(tmp, self.path)
 
     # ---- access ------------------------------------------------------------
     def add(self, position: Position) -> None:

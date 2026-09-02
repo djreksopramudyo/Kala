@@ -27,7 +27,7 @@ def test_age_is_none_when_file_missing(tmp_path):
 
 def test_age_is_none_for_corrupt_contents(tmp_path):
     p = tmp_path / "hb.txt"
-    p.write_text("not-a-number")
+    p.write_text("not-a-number", encoding="utf-8")
     assert heartbeat_age_seconds(p) is None
 
 

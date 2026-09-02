@@ -13,7 +13,7 @@ FRESH = time.time() - 2 * 86400
 
 def _touch(path: Path, mtime: float | None = None, content: str = "x"):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content)
+    path.write_text(content, encoding="utf-8")
     if mtime is not None:
         import os
         os.utime(path, (mtime, mtime))
@@ -79,5 +79,5 @@ def test_apply_never_overwrites_existing_archive(tmp_path):
     root = _fake_repo(tmp_path)
     _touch(root / "results" / "archive" / "old_scan.csv", content="earlier archive")
     apply_plan(plan_tidy(root, age_days=30))
-    assert (root / "results" / "archive" / "old_scan.csv").read_text() == "earlier archive"
+    assert (root / "results" / "archive" / "old_scan.csv").read_text(encoding="utf-8") == "earlier archive"
     assert (root / "results" / "archive" / "old_scan_1.csv").exists()

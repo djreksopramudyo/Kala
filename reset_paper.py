@@ -51,7 +51,7 @@ def read_current_state(root: Path = ROOT) -> dict | None:
     exist yet. Used by callers (the CLI, the bot's /reset) to show what
     would be discarded BEFORE asking for confirmation."""
     p = root / "paper_state.json"
-    return json.loads(p.read_text()) if p.exists() else None
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
 def perform_reset(capital: float, sync_config: bool = True, root: Path = ROOT) -> dict:
@@ -72,10 +72,10 @@ def perform_reset(capital: float, sync_config: bool = True, root: Path = ROOT) -
     backed_up_to = None
     old_summary = None
     if state_path.exists():
-        raw = json.loads(state_path.read_text())
+        raw = json.loads(state_path.read_text(encoding="utf-8"))
         old_summary = _summarize(raw)
         backup_path = root / f"paper_state_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        backup_path.write_text(json.dumps(raw, indent=2))
+        backup_path.write_text(json.dumps(raw, indent=2), encoding="utf-8")
         backed_up_to = backup_path.name
 
     fresh = {
@@ -86,14 +86,14 @@ def perform_reset(capital: float, sync_config: bool = True, root: Path = ROOT) -
         "log": [],
         "benchmark_start": None,   # re-recorded automatically on the next run
     }
-    state_path.write_text(json.dumps(fresh, indent=2))
+    state_path.write_text(json.dumps(fresh, indent=2), encoding="utf-8")
 
     config_synced = False
     if sync_config and config_path.exists():
-        cfg = json.loads(config_path.read_text())
+        cfg = json.loads(config_path.read_text(encoding="utf-8"))
         cfg["start_capital_idr"] = capital
         cfg["daily_capital_idr"] = capital
-        config_path.write_text(json.dumps(cfg, indent=2))
+        config_path.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
         config_synced = True
 
     return {"backed_up_to": backed_up_to, "old_summary": old_summary,

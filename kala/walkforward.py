@@ -67,6 +67,29 @@ DEFAULT_THRESHOLDS = (50.0, 55.0, 60.0, 65.0, 70.0, 75.0)
 # Per-trade statistics — EV first, win rate as context
 # ---------------------------------------------------------------------------
 
+def excess_ev(stats: dict | None) -> float | None:
+    """The excess EV of a fold, or None when no excess was COMPUTED.
+
+    Never 0.0 for the not-measured case. ``trade_stats([])`` returns a fully
+    populated dict whose ev_pct is 0.0, and a populated dict is truthy — so the
+    obvious guards (``if stats:`` / ``stats or {}``) both sail straight past an
+    empty result and hand back a zero.
+
+    That zero then rendered as "+0.00" in the fold table and was written as
+    ``0.0`` into --save-folds JSON: a run with no benchmark reported "measured,
+    exactly no alpha, in all fourteen folds" instead of "not measured". The
+    saved file is the worse half, because it outlives the terminal and gets
+    correlated later.
+
+    A run of identical zeros also has zero variance, so a correlation against
+    it comes back NaN — which looks like the tooling correctly refusing to
+    answer, when in fact it was fed fabricated data.
+    """
+    if not stats or stats.get("n", 0) <= 0:
+        return None
+    return stats.get("ev_pct")
+
+
 def trade_stats(returns: list[float]) -> dict:
     """Pooled statistics for a list of NET per-trade returns (percent).
 
@@ -373,21 +396,74 @@ def pick_threshold(sweep: dict[float, dict], baseline: float,
 # The walk itself
 # ---------------------------------------------------------------------------
 
-def _edge_verdict(stats: dict) -> str:
+DSR_CONFIDENT = 0.95      # the report's own stated bar for the deflated Sharpe
+T_CONFIDENT = 2.0         # the report's own stated bar for the t-statistic
+
+
+def _edge_verdict(stats: dict, clustered_t: float | None = None,
+                  dsr: float | None = None, n_trials: int = 0) -> str:
     """Shared verdict wording for a pooled trade_stats dict — used for both
     the raw-return check and the alpha (excess-over-benchmark) check, so the
-    two read as the same kind of judgment, not two different vocabularies."""
-    t = stats.get("t_stat", 0.0)
+    two read as the same kind of judgment, not two different vocabularies.
+
+    ``clustered_t`` and ``dsr`` MUST be the ones computed for the same arm as
+    ``stats``. Passing the walk-forward arm's clustered t alongside the
+    fixed-baseline arm's stats would judge one arm by another's evidence.
+
+    WHY THESE ARGUMENTS EXIST
+    -------------------------
+    This function used to read only ``stats["t_stat"]`` — the PLAIN t. The
+    report printed the clustered t and the deflated Sharpe directly above the
+    verdict, told the reader in as many words to trust them, and then rendered
+    a verdict that ignored both.
+
+    That went live. A run against an equal-weighted benchmark printed:
+
+        clustered t (by entry date) = 1.60  vs plain t = 1.74
+        deflated Sharpe = 0.670 ...
+        Below ~0.95, the winning threshold is not distinguishable from the
+        best of that many coin flips.
+        ALPHA VERDICT: ALPHA CHECK: EDGE CONFIRMED OOS
+
+    Both corrections said no. The headline said yes, off a plain t of 2.05 that
+    the surrounding text had just finished explaining was too generous. A
+    reader who trusts the bold line — which is what a bold line is for — gets
+    the opposite of what the evidence supports.
+    """
     ev = stats.get("ev_pct", 0.0)
     if stats.get("n", 0) < 30:
         return "INCONCLUSIVE — too few OOS trades to judge the edge."
-    if ev > 0 and t >= 2.0:
-        return "EDGE CONFIRMED OOS — positive EV, statistically distinguishable from 0."
-    if ev > 0:
-        return ("EV positive but WEAK (t < 2): could be noise. "
-                "More history or a stronger filter needed before trusting it.")
-    return ("NO OOS EDGE — the in-sample numbers were fit, not found. "
-            "Do not size up on backtest returns.")
+    if ev <= 0:
+        return ("NO OOS EDGE — the in-sample numbers were fit, not found. "
+                "Do not size up on backtest returns.")
+
+    # Same-day trades share that day's move, so the plain t over-rejects.
+    # Where the clustered t exists it is the honest one and it governs.
+    if clustered_t:
+        t_used, t_label = clustered_t, "clustered t"
+    else:
+        t_used, t_label = stats.get("t_stat", 0.0), "t"
+
+    if t_used < T_CONFIDENT:
+        return (f"EV positive but WEAK ({t_label} {t_used:.2f} < {T_CONFIDENT:g}): "
+                f"could be noise. More history or a stronger filter needed "
+                f"before trusting it.")
+
+    # Surviving the t is not enough when the threshold was the best of N.
+    if n_trials and dsr is not None and dsr < DSR_CONFIDENT:
+        return (f"EV positive and {t_label} {t_used:.2f} clears {T_CONFIDENT:g}, "
+                f"but the DEFLATED SHARPE is {dsr:.3f} (< {DSR_CONFIDENT}) after "
+                f"deflating for {n_trials} thresholds tried — NOT distinguishable "
+                f"from the best of that many coin flips. Do not size up on it.")
+
+    return "EDGE CONFIRMED OOS — positive EV, statistically distinguishable from 0."
+
+
+# Public alias. The live path judges a saved measurement with the SAME words
+# this report uses, deliberately: a third vocabulary for the same question is
+# how a screen ends up saying "EDGE CONFIRMED" while the report that produced
+# the file says the opposite.
+edge_verdict = _edge_verdict
 
 
 @dataclass
@@ -428,21 +504,34 @@ class WalkForwardReport:
     # walk-forward computes it.
     pooled_excess_dsr: float = 0.0
     dsr_n_trials: int = 0
+    # The SAME two corrections, computed for the fixed-baseline arm. The ALPHA
+    # VERDICT is rendered from that arm, so judging it on the chosen arm's
+    # clustered t would apply one arm's statistic to another arm's conclusion.
+    pooled_excess_baseline_clustered_t: float = 0.0
+    pooled_excess_baseline_dsr: float = 0.0
 
     def summary_text(self) -> str:
         """Human-readable report (fits in a Telegram message for small runs)."""
         lines = []
         lines.append("WALK-FORWARD VALIDATION — out-of-sample per-trade EV")
-        lines.append("=" * 64)
+        lines.append("=" * 73)
         lines.append(f"{'fold':<5}{'test window':<26}{'thr':>5}"
-                     f"{'trades':>8}{'EV/trade':>10}{'win%':>7}{'IHSG%':>8}")
+                     f"{'trades':>8}{'EV/trade':>10}{'win%':>7}{'IHSG%':>8}"
+                     f"{'excess%':>9}")
         for fr in self.folds:
             win = f"{fr.fold.test_start.date()}..{fr.fold.test_end.date()}"
             bench = f"{fr.benchmark_return_pct:+.1f}" if fr.benchmark_return_pct is not None else "  n/a"
+            # Per-fold EXCESS, not just raw. Two long-only baskets in the same
+            # market have strongly correlated RAW fold returns by construction,
+            # so comparing strategies on the raw column measures the market and
+            # invites exactly the wrong conclusion. The excess column is the one
+            # that can say whether two signals share something beyond beta.
+            ex = excess_ev(fr.oos_excess_chosen)
+            ex_s = f"{ex:+.2f}" if ex is not None else "  n/a"
             lines.append(f"{fr.fold.fold_id:<5}{win:<26}{fr.chosen_threshold:>5.0f}"
                          f"{fr.oos_chosen['n']:>8}{fr.oos_chosen['ev_pct']:>+9.2f}%"
-                         f"{fr.oos_chosen['win_rate_pct']:>6.0f}%{bench:>8}")
-        lines.append("-" * 64)
+                         f"{fr.oos_chosen['win_rate_pct']:>6.0f}%{bench:>8}{ex_s:>9}")
+        lines.append("-" * 73)
 
         for label, s in (("POOLED OOS (walk-forward threshold)", self.pooled_chosen),
                          (f"POOLED OOS (fixed baseline {self.baseline_threshold:.0f})", self.pooled_baseline)):
@@ -451,7 +540,11 @@ class WalkForwardReport:
                          f"median={s['median_pct']:+.2f}%  win={s['win_rate_pct']:.0f}%  "
                          f"PF={s['profit_factor']:.2f}  t={s['t_stat']:.2f}")
         lines.append("-" * 64)
-        lines.append("VERDICT: " + _edge_verdict(self.pooled_baseline))
+        # Labelled RAW because that is what it is: measured against cash, not
+        # against the market. Unlabelled, it reads as the last word on the
+        # strategy — and when the alpha check below does not run, it becomes
+        # the last word, which is how a beta result gets recorded as an edge.
+        lines.append("VERDICT (raw, vs cash): " + _edge_verdict(self.pooled_baseline))
 
         if self.pooled_excess_baseline.get("n", 0) > 0:
             lines.append("-" * 64)
@@ -471,6 +564,15 @@ class WalkForwardReport:
                 lines.append(
                     f"  clustered t (by entry date) = "
                     f"{self.pooled_excess_clustered_t:.2f}  vs plain t = {plain:.2f}")
+                # The verdict is rendered from the BASELINE arm, so that arm's
+                # own corrections have to be on the page. Printing only the
+                # chosen arm's left the verdict's actual basis invisible.
+                if self.pooled_excess_baseline_clustered_t:
+                    plain_b = self.pooled_excess_baseline.get("t_stat", 0.0)
+                    lines.append(
+                        f"  fixed-baseline arm: clustered t = "
+                        f"{self.pooled_excess_baseline_clustered_t:.2f}  vs plain t = "
+                        f"{plain_b:.2f}   <- the ALPHA VERDICT is judged on THIS")
                 lines.append(
                     "  The plain t assumes trades are independent; same-day "
                     "trades share that day's move, so it over-rejects. Trust "
@@ -481,6 +583,11 @@ class WalkForwardReport:
                     f"  deflated Sharpe = {self.pooled_excess_dsr:.3f}  "
                     f"(P[true Sharpe > 0] after deflating for "
                     f"{self.dsr_n_trials} thresholds tried)")
+                if self.pooled_excess_baseline_dsr:
+                    lines.append(
+                        f"  fixed-baseline arm: deflated Sharpe = "
+                        f"{self.pooled_excess_baseline_dsr:.3f}"
+                        f"   <- and on THIS")
                 lines.append(
                     "  Below ~0.95, the winning threshold is not "
                     "distinguishable from the best of that many coin flips.")
@@ -493,8 +600,38 @@ class WalkForwardReport:
                                  "looks like market exposure during favorable windows, not "
                                  "stock selection.")
             else:
-                alpha_verdict = "ALPHA CHECK: " + _edge_verdict(self.pooled_excess_baseline)
+                alpha_verdict = "ALPHA CHECK: " + _edge_verdict(
+                    self.pooled_excess_baseline,
+                    clustered_t=self.pooled_excess_baseline_clustered_t,
+                    dsr=self.pooled_excess_baseline_dsr,
+                    n_trials=self.dsr_n_trials)
             lines.append("ALPHA VERDICT: " + alpha_verdict)
+        else:
+            # The absence of this section used to be silent, on the reasoning
+            # that the alpha check was additive and opt-in. It is not additive
+            # any more: it is the measurement that overturned the exit-ladder
+            # result, and every conclusion drawn from this harness rests on it.
+            #
+            # A run with a mistyped --benchmark prints its warning on stderr,
+            # then produces a report whose only difference is a MISSING
+            # section. Redirect stdout to a log and the warning is gone, and
+            # what is saved reads as a clean confirmed edge. A missing section
+            # is far harder to notice than a wrong number, so it is named here.
+            lines.append("-" * 64)
+            lines.append("ALPHA CHECK: NOT RUN — no benchmark returns were available for "
+                         "these trades.")
+            lines.append("  The verdict above is measured against CASH, not against the "
+                         "market. It")
+            lines.append("  cannot distinguish stock-picking from having been long during "
+                         "a rally,")
+            lines.append("  which is the distinction this harness exists to make.")
+            lines.append("  Usual cause: --benchmark names a ticker yfinance does not "
+                         "resolve (it")
+            lines.append("  accepts any string), or the benchmark history does not overlap "
+                         "the test")
+            lines.append("  windows. Re-run with a benchmark that resolves before treating "
+                         "this as")
+            lines.append("  an edge.")
         return "\n".join(lines)
 
 
@@ -530,6 +667,7 @@ def walk_forward(dfs: dict[str, pd.DataFrame],
     pooled_exc_c: list[float] = []
     pooled_exc_c_dates: list = []
     pooled_exc_b: list[float] = []
+    pooled_exc_b_dates: list = []
 
     for fold in folds:
         # 1) choose on TRAIN only
@@ -558,7 +696,7 @@ def walk_forward(dfs: dict[str, pd.DataFrame],
         oos_c = [t.net_return_pct for t in trades_c]
         oos_b = [t.net_return_pct for t in trades_b]
         exc_c, exc_c_dates = excess_returns_by_date(trades_c, benchmark)
-        exc_b = excess_returns(trades_b, benchmark)
+        exc_b, exc_b_dates = excess_returns_by_date(trades_b, benchmark)
 
         bench_ret = None
         if benchmark is not None and len(benchmark) >= 2:
@@ -584,6 +722,7 @@ def walk_forward(dfs: dict[str, pd.DataFrame],
         pooled_exc_c.extend(exc_c)
         pooled_exc_c_dates.extend(exc_c_dates)
         pooled_exc_b.extend(exc_b)
+        pooled_exc_b_dates.extend(exc_b_dates)
 
     return WalkForwardReport(
         folds=results,
@@ -593,5 +732,9 @@ def walk_forward(dfs: dict[str, pd.DataFrame],
         pooled_excess_chosen=trade_stats(pooled_exc_c),
         pooled_excess_baseline=trade_stats(pooled_exc_b),
         pooled_excess_clustered_t=clustered_t_stat(pooled_exc_c, pooled_exc_c_dates),
+        pooled_excess_baseline_clustered_t=clustered_t_stat(pooled_exc_b,
+                                                            pooled_exc_b_dates),
+        pooled_excess_baseline_dsr=_dsr_fields(
+            pooled_exc_b, len(list(thresholds)))["pooled_excess_dsr"],
         **_dsr_fields(pooled_exc_c, len(list(thresholds))),
     )

@@ -58,7 +58,7 @@ def test_legacy_state_file_still_loads_and_saves(tmp_path):
         "pending": [], "log": [], "benchmark_start": None,
         "capital_additions": [], "dividends": [],
         "undo_stack": [], "redo_stack": [],
-    }))
+    }), encoding="utf-8")
     pt = PaperTrader.load(path)
     assert pt.positions["A.JK"].fills is None       # untouched
     pt.save()

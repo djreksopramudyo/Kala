@@ -339,6 +339,39 @@ WATCHLIST = ALL_SHARIA_STOCKS
 START_DATE = '2020-03-01'
 END_DATE = now().strftime('%Y-%m-%d')  # Indonesian time
 
+# The score at or above which a signal is STRONG rather than plain BUY.
+STRONG_BUY_SCORE = 80.0
+
+
+def signal_for_score(score: float, buy_threshold: float,
+                     strong_threshold: float = STRONG_BUY_SCORE,
+                     is_safe: bool = True) -> str:
+    """The BUY/HOLD/SELL label for a composite score. Pure, so it can be tested.
+
+    Extracted because this five-branch ladder IS the live buy decision, and
+    the only thing that had ever exercised it was running the whole scanner
+    against the network.
+
+    ``strong_threshold`` never drops below ``buy_threshold``: with the
+    forward_test profile's cutoff of 80 and a hardcoded STRONG at 80, the
+    plain-BUY band is empty and every qualifying name is STRONG BUY. That is
+    correct — the paper trader buys both labels — but a band that can never
+    fire should be a consequence of the numbers, not an accident of ordering.
+    """
+    if not is_safe:
+        return 'AVOID'
+    strong = max(float(strong_threshold), float(buy_threshold))
+    if score >= strong:
+        return 'STRONG BUY'
+    if score >= buy_threshold:
+        return 'BUY'
+    if score >= 50:
+        return 'HOLD'
+    if score >= 35:
+        return 'SELL'
+    return 'STRONG SELL'
+
+
 # Default strategy parameters
 DEFAULT_FAST_SMA = 10
 DEFAULT_SLOW_SMA = 50
@@ -1511,7 +1544,7 @@ def get_live_signal(ticker: str, fast_sma: int = 10, slow_sma: int = 50,
         # (suspended/illiquid/stale) are a separate, orthogonal concern and
         # still apply, same as before.
         # ============================================================
-        from kala.config import Config as _Config
+        from kala.config import live_config as _live_config
         from kala.scoring import composite_score as _composite_score
         from kala.scoring import compute_features as _compute_features
         _feats = _compute_features(data)
@@ -1527,7 +1560,11 @@ def get_live_signal(ticker: str, fast_sma: int = 10, slow_sma: int = 50,
             composite_technical_score *= 0.7  # 30% penalty
 
         technical_score = max(0, min(100, composite_technical_score))
-        buy_threshold = _Config().backtest.score_entry_threshold  # validated BUY cutoff (60)
+        # The cutoff the CONFIGURED profile says to buy at — not a hardcoded
+        # Config() default. This line used to read the legacy 60 regardless of
+        # runner_config.json, while daily_run logged the profile's 80 on every
+        # run. See kala.config.live_config.
+        buy_threshold = _live_config().backtest.score_entry_threshold
 
         # ATR-based stop-loss (dynamic, volatility-adjusted)
         stop_loss_price = current_price - (2 * atr_current) if atr_current > 0 else current_price * 0.95
@@ -1540,18 +1577,7 @@ def get_live_signal(ticker: str, fast_sma: int = 10, slow_sma: int = 50,
         sell_at_profit_price = current_price * (1 + TARGET_PROFIT_PCT / 100)
 
         # Generate signal based on the validated composite score
-        if not is_safe:
-            signal = 'AVOID'
-        elif technical_score >= 80:
-            signal = 'STRONG BUY'
-        elif technical_score >= buy_threshold:
-            signal = 'BUY'
-        elif technical_score >= 50:
-            signal = 'HOLD'
-        elif technical_score >= 35:
-            signal = 'SELL'
-        else:
-            signal = 'STRONG SELL'
+        signal = signal_for_score(technical_score, buy_threshold, is_safe=is_safe)
 
         # --- BUY-SIDE GUARDRAILS (v3.1) -----------------------------------
         # The scanner rewards momentum, so it would happily buy a stock that has
@@ -1561,12 +1587,25 @@ def get_live_signal(ticker: str, fast_sma: int = 10, slow_sma: int = 50,
         if signal in ('BUY', 'STRONG BUY'):
             try:
                 from kala.entries import evaluate_entry
-                _entry = evaluate_entry(data, market_status=mkt.get('status'))
+                from kala.entry_settings import load_entry_config
+                # Was: evaluate_entry(data, market_status=...) with no cfg, so
+                # EntryConfig()'s defaults applied and all five vetoes were
+                # hardcoded ON — the measured-WORST setting, unreachable from
+                # runner_config.json. Defaults are unchanged; the config can
+                # now select something else. See kala/entry_settings.py.
+                _ecfg, _ = load_entry_config()
+                _entry = evaluate_entry(data, market_status=mkt.get('status'),
+                                        cfg=_ecfg)
                 entry_vetoes = _entry.vetoes
                 if not _entry.allowed:
                     signal = 'HOLD'  # downgrade: do not chase
-            except Exception:
-                pass
+            except Exception as _e:  # noqa: BLE001 - reported, not swallowed
+                # A crash here used to leave the BUY standing with an empty
+                # veto list and nothing said so: the guardrail failed OPEN and
+                # looked like "no veto fired". Now the failure is carried in
+                # the veto list itself, so a reader sees it.
+                from kala.entry_settings import veto_check_failed_note
+                entry_vetoes = [veto_check_failed_note(_e)]
 
         # Build result dictionary
         result = {

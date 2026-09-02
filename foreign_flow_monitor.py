@@ -19,32 +19,26 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from kala.broker_flow_archive import BrokerFlowArchive
 from kala.foreign_flow_monitor import format_report, rank_foreign_accumulation
+from kala.universe_sources import default_universe
 
-STATE_PATH = "paper_state.json"
-WATCHLIST_PATH = "watchlist.json"
+# Anchored to the repository, not the caller's working directory — see
+# archive_sentiment.py for why a bare relative path silently shrinks the
+# universe this ranks over.
+ROOT = Path(__file__).resolve().parent
+STATE_PATH = ROOT / "paper_state.json"
+WATCHLIST_PATH = ROOT / "watchlist.json"
 
 
 def _default_tickers() -> list[str]:
     """Open paper-trading positions + watchlist — same selection the sentiment
-    and fundamentals archival CLIs use. Each source degrades to nothing on
-    failure rather than crashing."""
-    tickers: set[str] = set()
-    try:
-        from kala.papertrade import PaperTrader
-        pt = PaperTrader.load(STATE_PATH, start_capital=10_000_000)
-        tickers.update(pt.positions)
-    except Exception:
-        pass
-    try:
-        from kala.watchlist import WatchlistStore
-        wl = WatchlistStore.load(WATCHLIST_PATH)
-        tickers.update(item.ticker for item in wl)
-    except Exception:
-        pass
-    return sorted(tickers)
+    and fundamentals archival CLIs use, through the same helper. Each source
+    still degrades to nothing rather than crashing, and now reports on stderr
+    when it does."""
+    return default_universe(STATE_PATH, WATCHLIST_PATH).tickers
 
 
 def main(argv: list[str] | None = None) -> int:

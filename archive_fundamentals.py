@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from kala.clock import today_str_wib
 from kala.fundamental_archive import FundamentalArchive
@@ -41,33 +42,25 @@ from kala.invezgo_fetch import (
     InvezgoClient,
     fetch_financial_statement,
 )
+from kala.universe_sources import default_universe
 
-STATE_PATH = "paper_state.json"
-WATCHLIST_PATH = "watchlist.json"
+# Anchored to the repository, not the caller's working directory — see
+# archive_sentiment.py for why a bare relative path silently shrinks the
+# archived universe.
+ROOT = Path(__file__).resolve().parent
+STATE_PATH = ROOT / "paper_state.json"
+WATCHLIST_PATH = ROOT / "watchlist.json"
 
 
 def _tickers_to_archive(explicit: list[str] | None) -> list[str]:
     """Explicit --tickers if given, else the union of open paper-trading
     positions and the watchlist -- the names actually worth tracking. Each
-    source degrades to 'contributes nothing' on any failure rather than
-    crashing the run. (Mirrors archive_sentiment.py's selection.)"""
+    source still degrades to 'contributes nothing' rather than crashing the
+    run, and now reports on stderr when it does. (Mirrors
+    archive_sentiment.py's selection; both call the same helper.)"""
     if explicit:
         return list(explicit)
-
-    tickers: set[str] = set()
-    try:
-        from kala.papertrade import PaperTrader
-        pt = PaperTrader.load(STATE_PATH, start_capital=10_000_000)
-        tickers.update(pt.positions)
-    except Exception:
-        pass
-    try:
-        from kala.watchlist import WatchlistStore
-        wl = WatchlistStore.load(WATCHLIST_PATH)
-        tickers.update(item.ticker for item in wl)
-    except Exception:
-        pass
-    return sorted(tickers)
+    return default_universe(STATE_PATH, WATCHLIST_PATH).tickers
 
 
 def main(argv: list[str] | None = None) -> int:

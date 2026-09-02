@@ -20,12 +20,12 @@ def test_falls_back_to_positions_and_watchlist(monkeypatch, tmp_path):
                                   "entry_date": "2026-01-01", "peak_price": 1.0}},
         "log": [], "pending": [], "undo_stack": [], "redo_stack": [], "benchmark_start": None,
         "capital_additions": [],
-    }))
+    }), encoding="utf-8")
     watchlistfile = tmp_path / "watchlist.json"
     watchlistfile.write_text(json.dumps({
         "BBCA.JK": {"ticker": "BBCA.JK", "fair_value": 10000.0, "score": None,
                     "thesis": "", "added": "2026-01-01", "source": ""},
-    }))
+    }), encoding="utf-8")
 
     monkeypatch.setattr(arch, "STATE_PATH", str(statefile))
     monkeypatch.setattr(arch, "WATCHLIST_PATH", str(watchlistfile))

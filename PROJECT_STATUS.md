@@ -28,10 +28,29 @@ This file grew by append-only correction over many sessions and is now long.
 The title line above is a changelog, not an orientation. This section is the
 map; everything below is the evidence in the order it arrived.
 
-**The one-line answer**: no predictive edge survived honest testing, but
-several *structural* choices did — and one late result (core-satellite)
-reversed an earlier conclusion, so read the Results subsections rather than
-trusting any single summary line.
+> **CORRECTION, 2026-08-17 — read this before the table below.**
+>
+> Everything in this SUMMARY was written from results measured THROUGH the
+> exit ladder (stop -5% / target +8% / trailing / 20-bar hold). The full
+> universe now shows that ladder is not neutral: on its own it is
+> significantly NEGATIVE — excess -0.45%/trade, clustered t -3.79, losing in
+> 12 of 14 folds across 18,931 trades.
+>
+> Remove it and the SAME signal on the SAME universe and folds returns
+> excess +4.70%/trade, clustered t +5.09, DSR 1.000. The liquidity split
+> confirms this is not survivorship (present in both halves, STRONGER in the
+> liquid half at t +4.31) and not universe drift (threshold-0 control is
+> zero in both halves).
+>
+> So the one-line answer below is WRONG as stated, and every verdict in the
+> table carries the same handicap — see "What the ladder does to all sixteen
+> verdicts" further down. The evidence is in "FULL-UNIVERSE EXIT-PROFILE
+> COMPARISON" and "FULL-UNIVERSE LIQUIDITY SPLIT" at the end of this file.
+
+**The one-line answer** (SUPERSEDED — see the correction above): no predictive
+edge survived honest testing, but several *structural* choices did — and one
+late result (core-satellite) reversed an earlier conclusion, so read the
+Results subsections rather than trusting any single summary line.
 
 ### Signals — 16 hypotheses, all null after the alpha check
 
@@ -1605,3 +1624,2641 @@ that are entirely downtrend cannot distinguish it from chance.
 and not re-fetching the 490 gaps (measured: the old estimator moved only 1.9%
 of BUY signals). Two folds that are both crashes cannot separate defensive
 stock-picking from luck, however many trades they contain.
+
+## Exit-ladder result (2026-08-13) — the ladder SUBTRACTS value; no holding period is decidable yet
+
+The first out-of-sample test of the exit engine itself. Entry side, folds, costs
+and universe held fixed throughout; only the exit geometry varies, so every
+comparison below is like-for-like. Built for this:
+`diagnose_exit_param_sweep.py`.
+
+Prompted by a live observation, not a hypothesis: the paper book kept returning
+either a scratch or a stop-sized loss. The closed-trade log showed three
+clusters sitting exactly on `hard_stop_pct`, `target_profit_pct` and
+`breakeven_trigger_pct` — the ladder's own geometry, printed in the P&L.
+
+### What was run
+
+```
+python diagnose_exit_param_sweep.py --max-tickers 40 --period 5y --tick-spread
+python diagnose_exit_param_sweep.py --max-tickers 40 --period 5y --tick-spread \
+    --targets 10 12 16 20 --breakevens 6 8 99
+python diagnose_exit_param_sweep.py --max-tickers 40 --period 5y --tick-spread \
+    --sweep-holding 10 20 40 60 90 120
+```
+
+35 usable tickers, 14 folds, train 252 / test 63, tick-floored spread.
+
+### Result 1 — the ladder subtracts value. This one stands.
+
+Every one of 48 stop x target x breakeven cells came back with negative
+expectancy, and in every cell the realised win rate sat BELOW the break-even
+win rate its own geometry demands. A control line — same entries, same folds,
+all price-based exits switched off so only `holding_max_days` closes a position
+— beat every managed cell by roughly half a percentage point per trade.
+
+The mechanism is in the payoff column, not the win column. Managing the exit
+RAISES the win rate and LOWERS the payoff ratio, and the payoff loss dominates.
+The median trade is negative everywhere including the control: this is a
+positive-skew system whose expectancy lives in a thin right tail, and a target
+profit is precisely the rule that amputates it.
+
+Note which way the multiple-comparison bias runs: taking the best of 48 cells
+inflates the winner, and the winner was still negative. That makes this a
+CONSERVATIVE negative — deflation cannot rescue it and is not needed.
+
+### Result 2 — no holding period is decidable. This one does NOT stand.
+
+With all exit rules off, sweeping `holding_max_days` produced its best
+expectancy at 60 days. It fails on three independent counts:
+
+  * **t below 1.0.** The project's bar is |t| >= 2. Nothing in the column
+    clears it.
+  * **The column is not monotone** — it rises, dips, then rises again. A real
+    effect produces a smooth surface; this is the shape of noise.
+  * **Best of six trials**, unadjusted.
+
+Payoff rises smoothly with holding period while win rate falls, and the two
+roughly cancel. That is a coherent story with no measurable edge attached.
+
+### Why it is undecided: the sweep used 6% of the universe
+
+At the best holding period the implied per-trade standard deviation puts the
+sample needed for |t| = 2 at roughly four and a half times what the sweep
+produced. That reads like a structural wall, and it is not one — the run
+sampled 35 of the 615 tickers in `ALL_SHARIA_STOCKS` because `--max-tickers`
+defaulted low. Extrapolating the observed trades-per-ticker to the full
+universe clears the required sample with room to spare.
+
+**So the honest status of Result 2 is UNTESTED AT ADEQUATE POWER, not
+"no effect".** Re-run across the whole universe before drawing any conclusion
+about holding periods. That is the single cheapest open experiment in the
+project — one flag.
+
+### What this does and does not license
+
+  * **Supported:** the configured ladder costs money. `target_profit_pct` and
+    `breakeven_trigger_pct` as they stand are value-destroying on this
+    universe, consistently, across dozens of configurations.
+  * **NOT supported:** that holding longer makes money. The control's absolute
+    expectancy is thin and its t is not close to the bar.
+  * **NOT supported:** any specific holding period as a config value. 60 days
+    is the top row of a noisy column, not a setting.
+
+### The constraint this points at
+
+Across every configuration tried, the gap between realised win rate and the
+break-even win rate the geometry demands was small and usually negative. No
+exit rule can manufacture that margin — it is a property of the entry signal.
+This is the third independent line of evidence pointing the same way, after the
+look-ahead retraction and the momentum walk-forward.
+
+Consistent with the standing position: the entry signal remains unvalidated,
+and nothing here changes that.
+
+## Holding-period result (2026-08-14) — survives every correction available; blocked on survivorship
+
+Full universe, exits off, benchmark-excess measured. This is the strongest
+result the project has produced, and it is still NOT a validation. Both halves
+of that sentence matter.
+
+### What was run
+
+```
+python diagnose_exit_param_sweep.py --max-tickers 615 --period 5y --tick-spread \
+    --warehouse results/warehouse.db --min-price 0 --sweep-holding 20 40 60 90 120
+```
+
+569 usable tickers, 14 folds, train 252 / test 63, tick-floored spread, no
+price screen. All price-based exit rules off — only `holding_max_days` closes a
+position.
+
+```
+hold_d     n     EV%    med%   win%  be-win%  payoff    PF  clust_t   exEV%  ex_clt
+    20  12184  +0.927  -3.05   32.9    29.6    2.38  1.17   +2.82  +1.055   +3.60
+    40   8986  +2.134  -3.89   29.5    23.6    3.24  1.36   +3.94  +2.200   +4.43
+    60   7877  +2.403  -4.01   29.0    22.5    3.44  1.40   +4.01  +2.447   +4.51
+    90   7286  +1.967  -4.07   28.4    23.0    3.35  1.33   +3.28  +2.066   +3.74
+   120   7091  +2.021  -4.15   28.4    22.9    3.37  1.33   +3.29  +2.098   +3.70
+```
+
+### What holds
+
+Benchmark-excess clears |t| = 2 at every holding period on the CLUSTERED
+figure, between +3.60 and +4.51. The curve is a broad plateau from 40 days
+outward rather than a sharp peak, which is the shape a real effect makes; a
+spike at one setting would be the shape of a fit.
+
+`exEV%` EXCEEDS `EV%` in every row, meaning IHSG fell on average across the
+holding windows. The raw return was already beating a declining index, so this
+is not market exposure wearing a disguise.
+
+### The three corrections it survived — and where they came from
+
+Each of these changed the answer, and **each was a defect in the sweep tool
+rather than planned rigour**. Recording that honestly, because the sequence is
+the reason to trust the number:
+
+1. **Wrong result field.** The tool read `res.trades`; the field is
+   `res.closed`. Guarded by a `getattr` default, so every cell silently
+   returned zero and the first full grid printed as a tidy table of zeros. Had
+   this not been caught, the conclusion would have been "the exit ladder makes
+   no difference".
+2. **Look-ahead price screen.** The sweep inherited `fetch()`'s `--min-price`
+   filter, which tests each ticker's LATEST close — the exact mechanism behind
+   this project's earlier retraction. Re-run at `--min-price 0`.
+3. **No alpha check.** Only raw expectancy was measured. A long-only book held
+   for weeks shows raw expectancy from market exposure alone; the project's bar
+   has always been |t| >= 2 on raw AND excess.
+
+A plain t was also being reported where a clustered one was required — 569
+tickers entering on shared dates are not independent draws. `clustered_t_stat`
+had existed in `walkforward.py` the whole time.
+
+### What blocks it
+
+**Survivorship, and it cannot be corrected — only stated.** The universe is
+CURRENT index membership. Every ticker in it survived to today; names delisted
+or dropped from the index, usually after falling, are absent from all of
+history. That bias falls hardest on exactly this kind of result: a long-hold
+strategy whose expectancy sits in a right tail, because the tail is made of
+survivors.
+
+This is not a bug to be fixed in a later pass. It is a limit of the data, and
+closing it needs point-in-time DES constituents, which IDX revises about twice
+a year and the project does not have.
+
+**These figures are an UPPER BOUND with a bias of unknown size.**
+
+### Status
+
+NOT VALIDATED. The correct reading is narrower and more useful than a verdict:
+*survived every correction that could be applied, blocked on one bias that
+cannot be*. That is a stronger position than anything else in this log, and it
+is not the same as an edge.
+
+Nothing here licenses sizing up. What it licenses is the next round of tests —
+see "what would settle it".
+
+### What would settle it
+
+  * **Signal-contribution control.** Sweep `score_entry_threshold` with exits
+    off. If expectancy is flat from threshold 0 to 80, the entry signal is
+    contributing nothing and the result is universe drift over the period, not
+    stock selection.
+  * **Cross-market replication.** Run the same holding sweep on
+    `US_SHARIA_STOCKS`. The project has used the US market as a reference
+    before. An effect that appears in both is far less likely to be an artefact
+    of IDX-specific survivorship.
+  * **Forward paper test.** The only clean answer to survivorship: trade it
+    forward, where the bias cannot exist by construction. Slow, and the only
+    method that actually closes the question.
+
+## Signal-contribution control (2026-08-14) — the composite score DOES select. Dose-response, monotone.
+
+The control that was missing from the holding-period result above, and the one
+that could have killed it. It did the opposite.
+
+The alpha check subtracts IHSG, but the universe is IDX SHARIA names, not
+IHSG. If that segment simply outperformed the index over these five years, the
+holding-period result would show a strong excess figure while the composite
+score selected nothing. Sweeping `score_entry_threshold` with exits off
+separates the two: a threshold of 0 enters almost every bar, so its row IS the
+universe.
+
+```
+python diagnose_exit_param_sweep.py --max-tickers 615 --period 5y --tick-spread \
+    --warehouse results/warehouse.db --min-price 0 --trust-short-cache \
+    --sweep-threshold 0 30 60 80 --hold-days 60
+```
+
+```
+thresh      n      EV%    med%   win%  payoff     PF  clust_t    exEV%  ex_clt
+     0  15907   -0.201   -2.41   30.0    2.25   0.97    -0.49   +0.220   +0.68
+    30  13467   +0.621   -2.44   27.5    2.94   1.11    +1.41   +0.875   +2.43
+    60   7878   +2.401   -4.01   29.0    3.44   1.40    +4.01   +2.445   +4.50
+    80   5635   +4.037   -4.79   32.8    3.30   1.61    +4.73   +4.009   +4.97
+```
+
+### What this establishes
+
+**The universe alone has no edge.** At threshold 0 the raw expectancy is
+NEGATIVE and the clustered excess t is +0.68 — not significant. Whatever is
+happening at higher thresholds is not the segment drifting up.
+
+**The signal selects, and it does so in proportion to how hard it is asked
+to.** EV, excess EV, profit factor and clustered excess t all rise monotonically
+across all four levels. A dose-response of that shape is much harder to
+manufacture than a single winning cell: it is not "best of N", it is a gradient.
+
+**It substantially defuses — though does not remove — the survivorship
+objection.** Survivorship inflates every row roughly equally, threshold 0
+included, so it cannot produce the gradient. The ABSOLUTE level remains an
+upper bound; the SELECTION effect is robust to a universe-level bias.
+
+### What it does not establish
+
+  * The absolute expectancy. Survivorship still biases the level, by an unknown
+    amount, and there is still no point-in-time constituent data.
+  * A setting. Threshold 80 is the highest value swept and the best one, so the
+    gradient has not turned over — the optimum is outside the box.
+  * That this is tradeable as-is. The median trade is NEGATIVE at every
+    threshold (-4.79% at 80) and the win rate is under 33%. The expectancy sits
+    in a right tail, which means holding a majority of losing positions to
+    collect a minority of large winners. Backtests do not measure whether the
+    operator can actually do that.
+
+### The implication for the standing verdict on the momentum score
+
+The composite score has been recorded as unvalidated, on walk-forward runs that
+evaluated it THROUGH the exit ladder. That ladder has since been measured as
+value-destroying (see "Exit-ladder result"). The earlier negative may therefore
+have been a property of the exits rather than of the signal — the entry score
+was being judged through a lens that was subtracting roughly half a point per
+trade.
+
+That is a hypothesis, not a correction to the record. Settling it means re-running
+the original walk-forward with exits disabled and comparing like for like.
+
+### Next
+
+  * Extend the threshold sweep (90, 95) until the gradient turns over or the
+    sample gives out.
+  * Feed the winner through `overfitting.deflated_sharpe`.
+  * Replicate on `US_SHARIA_STOCKS` — an effect present in both markets is
+    unlikely to be IDX-specific survivorship.
+  * Re-run the original momentum walk-forward with exits off.
+
+## Survivorship discriminator + benchmark corrections (2026-08-16) — the objection does not hold up
+
+The holding-period and signal-contribution results above were recorded as
+blocked on survivorship. This round attacks that objection directly, and it
+does not survive. Three separate tests, plus two benchmark corrections that
+changed how the earlier numbers should be read.
+
+### Liquidity split — the discriminator
+
+Survivorship bias lives in names that COULD have been delisted or dropped from
+the index and were not. Large, liquid IDX names rarely leave; the thin end
+carries most of the exposure. If the bias produces the alpha, the alpha must
+concentrate in the illiquid half.
+
+`--split-liquidity`, median daily turnover, benchmark XIJI.JK, exits off, 60d:
+
+```
+LIQUID (284 tickers)          thresh 0     thresh 60    thresh 80
+  exEV%                        +0.714       +2.422       +3.527
+  ex_clt                        +2.02        +4.25        +4.10
+
+ILLIQUID (285 tickers)
+  exEV%                        +0.660       +2.823       +4.692
+  ex_clt                        +1.62        +3.62        +3.87
+```
+
+The effect is present in BOTH halves, monotone in both, and the CLUSTERED t is
+HIGHER in the liquid half at every comparable threshold. The illiquid half
+shows a larger raw excess with a smaller t — the signature of more volatility,
+not more edge.
+
+**Survivorship is no longer the leading explanation.** That is not the same as
+ruled out: index membership shifts touch mid-caps too, and no point-in-time
+constituent list exists to settle it outright. But the test built to find the
+bias looked exactly where it should live and did not find it.
+
+### Two benchmark corrections
+
+**The US replication was judged against the wrong index.** This strategy holds
+one stock per trade — equal-weighted by construction — and was being compared
+with cap-weighted `^GSPC`, which five years of mega-cap concentration made
+nearly unbeatable by an equal-weight basket. Re-run against `RSP`:
+
+```
+thresh        0       30       60       80
+^GSPC     -2.91    -1.22    -0.44    +0.41
+RSP       -0.42    +0.66    +0.76    +1.18
+```
+
+The whole column lifts. The dose-response replicates in the US; the absolute
+alpha still does not clear the bar there (best +1.18 on n=714).
+
+**IHSG is the wrong benchmark for a sharia universe.** Against `XIJI.JK`,
+threshold 0 — buy almost everything — already shows +0.685% excess at
+ex_clt +2.18. The universe beats the sharia index before any selection
+happens, which is an equal-weight-versus-cap-weight premium, the same effect
+visible in the US pair.
+
+**This changes the honest attribution.** Of the +4.099% excess at threshold 80:
+
+  * **+0.685%** is the universe beating its benchmark — available by buying at
+    random, and NOT a contribution of the composite score;
+  * **+3.414%** is the increment from tightening the score. That is the number
+    that belongs to the signal.
+
+Quote +3.4, not +5.2. The larger figure will not survive scrutiny.
+
+### The gradient turns over
+
+Extending the threshold sweep to 95 / 97 / 99 flattens: excess EV moves 0.051
+points across that range while ex_clt DECLINES from +5.22 to +4.57 as the
+sample thins. The surface plateaus around 80-95 rather than climbing without
+limit — the healthier shape, and it means the exact threshold inside that band
+does not matter much.
+
+### Where this leaves the finding
+
+Established, in order of how hard each was to dislodge:
+
+  * the exit ladder destroys value — every one of 32 cells negative at full
+    universe, clustered t from -4.68 to -9.72, control beats the best cell by
+    1.599 points per trade;
+  * the entry score selects — monotone dose-response across four thresholds, in
+    TWO markets;
+  * it is not universe drift — threshold 0 has negative raw expectancy;
+  * it is not a benchmark artefact — holds against XIJI.JK and RSP;
+  * it is not concentrated in survivorship-exposed names — holds in the liquid
+    half, more strongly by t.
+
+Not established:
+
+  * the absolute magnitude. Some survivorship inflation remains, unquantified.
+  * that it is tradeable. The median trade is NEGATIVE at every threshold
+    (-4.79% at 80) with a win rate near a third. This requires holding a
+    majority of losing positions to collect a minority of large winners, and no
+    backtest measures whether the operator can do that. The live log shows the
+    opposite instinct: manual selling clustered at -5%.
+  * that it persists. One five-year window, no forward test.
+
+### What is left
+
+The only remaining objection that data on hand cannot address is survivorship's
+residual size, and the only clean answer is a FORWARD test, where the bias
+cannot exist by construction. Everything else has been tried.
+
+---
+
+## State-file durability (2026-08-16) — four ways the watchlist could vanish silently
+
+Not a research result. This is the forward test's precondition: the forward
+test is the only remaining answer to the survivorship objection, it runs for
+months, and it depends on state files that turned out to be losable without
+anything reporting a loss.
+
+The audit lens that found everything else applies here unchanged — the
+arithmetic is never wrong, the bug is where missing data quietly becomes a
+number. Here the number is zero, and it means four different things.
+
+### What was measured
+
+`repro_watchlist_silence.py` puts `watchlist.json` in four states and asks the
+code what it sees:
+
+| state on disk | what the caller was told |
+|---|---|
+| genuinely empty (`{}`) | `len == 0` |
+| file absent / process in another directory | `len == 0` |
+| truncated by an interrupted save | raised — into three `except Exception: pass` |
+| healthy, three researched names | `len == 3` |
+
+Rows two and three were indistinguishable from row one at every call site. The
+consequences were not equal:
+
+  * **`archive_sentiment.py`, `archive_fundamentals.py`, `foreign_flow_monitor.py`**
+    built their ticker universe from open positions plus the watchlist and
+    ended BOTH reads with `except Exception: pass`. Their archives are
+    point-in-time, so a day archived from a silently empty universe is a hole
+    that cannot be backfilled — and nothing in the data marks it as a hole
+    rather than a quiet day.
+  * **All four of those scripts plus `check_watchlist.py`** resolved
+    `watchlist.json` and `paper_state.json` against the caller's working
+    directory. Measured: the same command returned 3 names from the repo root
+    and 0 from one directory up. The shipped systemd units set
+    `WorkingDirectory=`, so the packaged deployment was safe; running the
+    scripts by hand was not.
+  * **`check_watchlist.py`** printed "Watchlist is empty. Run
+    kala_fundamental_only.py first" — advice to redo research that was
+    already done and sitting in a file it had failed to find.
+  * **`WatchlistStore.save` and `PositionStore.save`** used `write_text`,
+    which truncates the target before writing. `papertrade.py` had used
+    tmp-then-`os.replace` since v3.x for exactly this reason; these two never
+    got it. `PositionStore` holds `peak_price`, a running maximum accumulated
+    across sessions with no other source — it cannot be recomputed after loss.
+
+### The deployment finding
+
+`docker-compose.yml` mounted `paper_state.json`, `runner_config.json` and
+`results/`. It did not mount `watchlist.json`, which the weekly Saturday
+fundamental screen writes INSIDE the container. Every `docker compose up
+--build` discarded the fair values and theses, and `daily_run.py`'s dip-alert
+step then reported zero alerts — which looks exactly like a quiet week.
+
+Separately, `DOCKER.md`'s own setup block said `touch paper_state.json
+runner_config.json`. A zero-byte file is not valid JSON; all three loaders
+raise `JSONDecodeError` on one. The documented procedure produced a container
+that died on first run. `paper_state.json` additionally cannot be seeded with
+`{}` — `PaperTrader.load` raises `KeyError: 'cash'` — so the doc now calls
+`reset_paper.py`, which writes the correct skeleton.
+
+### What changed
+
+  * both stores write tmp-then-`os.replace`, and create missing parents;
+  * `WatchlistStore.load` records WHY a store is empty (`load_note`), naming
+    the resolved absolute path when the file is absent;
+  * `load()` still RAISES on a damaged file — that loudness is correct and was
+    not softened. `load_or_report()` is the opt-in for callers that must
+    survive, and it reports rather than swallows;
+  * `kala/universe_sources.py` holds one copy of the positions+watchlist
+    logic the three archivers each had their own version of. It still degrades
+    rather than aborting a run, and now says which source degraded, with its
+    path, plus a warning that an incomplete point-in-time archive cannot be
+    backfilled;
+  * the four scripts anchor their paths to `Path(__file__).parent`;
+  * compose mounts `watchlist.json`; DOCKER.md seeds correctly;
+  * `check_watchlist.py` distinguishes absent from empty, and uses argparse —
+    `--help` previously raised `ValueError: could not convert string to float`.
+
+### Verification
+
+20 new tests in `tests/test_state_files_are_durable.py`. Eight mutations,
+one per defect, reinserted mechanically by
+`repro/mutate_state_durability.py`: all eight go red. Full suite 1635 passed,
+1 skipped.
+
+### What this does NOT claim
+
+No trading number changes. Nothing here touches entries, exits, scoring or
+the walk-forward. It removes ways the forward test could quietly stop being a
+test of the strategy — the same failure the discipline report exists to catch,
+one layer down: a strategy that was never run, reported as one that did not
+work.
+
+---
+
+## Circuit-breaker state loss (2026-08-17) — a safety device that switched itself off quietly
+
+Same lens, applied to the one component whose entire job is to stop trading.
+The breaker is OFF by default, so this affects only an operator who
+deliberately turned it on — which is exactly the operator who would be relying
+on it.
+
+### What was measured
+
+`results/breaker_state.json` holds two things: the deposit-adjusted high-water
+mark, and whether the breaker is currently halted. `load_breaker_state`
+returned `(None, False)` for a file that does not exist YET and for a file that
+exists but will not parse. Downstream those are the same event, and the
+consequence is not symmetric:
+
+```
+stored_peak=None  -> high-water mark re-anchors to TODAY's equity
+was_halted=False  -> the "still halted" branch is skipped entirely
+                  -> drawdown computes as 0.0%, halt threshold not met
+                  -> new buys resume, satisfying none of the resume hysteresis
+```
+
+Measured on an account halted 30% below its peak: with the sidecar intact,
+`halted=True`. With the same sidecar unreadable, `halted=False` and
+`drawdown_pct=0.0` — a 30% drawdown reported as zero — while the run printed
+"First run: high-water mark anchored to today's equity", which is false.
+
+The module comment said the lost-sidecar case means "no false halt, no crash".
+True, and only one direction. It never named the missed halt, which arrives
+precisely when the halt was doing its job.
+
+### The part that was not obvious
+
+The first fix was wrong, and the test caught it. Carrying `was_halted=True`
+across an unreadable sidecar does NOTHING: with `stored_peak=None` the peak
+re-anchors to today, drawdown reads 0.0%, and the hysteresis branch reports
+RESUMED immediately. **The halt is not recoverable from the flag** — the
+measurement it was made against is what was lost. That required a separate
+`state_lost` input that halts on its own authority rather than through
+`drawdown`, and it is now pinned by
+`test_carrying_was_halted_alone_does_NOT_hold_the_halt`.
+
+### What changed, and what deliberately did not
+
+The DEFAULT is unchanged. Re-anchoring rather than halting was a documented
+choice with an explicit test behind it, and it is not overruled — the trading
+numbers are identical unless an operator opts in. What changed:
+
+  * `read_breaker_state()` returns `existed` and `error`, keeping "absent"
+    and "damaged" apart;
+  * `evaluate_breaker(state_lost=True)` plus
+    `BreakerConfig.preserve_halt_when_unreadable` (default False) let an
+    operator fail closed instead. The halt cannot stick: the reason string
+    says to delete the sidecar to re-anchor deliberately;
+  * `daily_run` reports `⚠️ BREAKER STATE LOST` with the parse error and
+    states plainly whether the halt was carried over.
+
+### Verification
+
+10 new tests in `tests/test_breaker_state_loss_is_visible.py`; 6 mutations, all
+6 red. Suite 1645 passed, 1 skipped.
+
+A note on the mutation run itself: the first pass reported all six mutations
+SURVIVED. The harness had been launched under a Python without pytest, so every
+run produced zero `FAILED` lines and read as green — including the baseline
+assertion, which was equally vacuous. The harness now refuses to score a run
+that collected no tests. This is the third time in this project a
+green-looking result came from a check that could not fail.
+
+---
+
+## Partial Telegram delivery (2026-08-17) — the message is the forward test's only output
+
+The forward test produces one artefact a human ever sees: the daily message.
+If that arrives incomplete, the missing part is indistinguishable from a day
+on which there was nothing to say.
+
+### What was measured
+
+Telegram caps a message at 4096 characters, so `send_telegram` splits long
+ones and posts them in sequence. A failure part-way leaves the earlier parts
+delivered. Measured on an 11,007-character message (tickets + friction report
++ scorecard = 3 parts) with the network failing after the first:
+
+```
+chunks actually delivered : 1 of 3
+send_telegram returned    : False
+```
+
+Two separate losses, in opposite directions:
+
+  * **On the phone.** One message arrives, begins with the tickets, and simply
+    stops. Nothing in it says a second and third part existed. The daily
+    message is ordered tickets-first and friction/scorecard last, so the tail
+    — the part that reports what the strategy is costing — is exactly what
+    goes missing.
+  * **In the log.** `daily_run` discarded the return value and wrote "Run
+    complete. N tickets, 0 errors." `results/daily_run.log` therefore reads
+    identically for a run delivered whole, delivered in part, and not
+    delivered at all. The failure text went to stdout only — journald, not the
+    file anyone opens after a quiet week.
+
+The bare bool could not express the difference either: `False` covered both
+"nothing sent" and "half sent", which are different problems with different
+responses.
+
+### What changed
+
+  * `send_telegram_detailed()` returns `Delivery(ok, sent_chunks,
+    total_chunks, error)` with a `partial` property and a `describe()` that is
+    never blank — it goes straight into a log line, where an empty string
+    would read as "fine".
+  * Split messages are labelled `(i/N)`. This is the fix that reaches the
+    reader: a message that stops at `(1/3)` is visibly incomplete on the
+    phone, which is where the reader actually is, rather than only in a log
+    they would have to think to check. Single-part messages are unlabelled, so
+    the ordinary day gains no noise.
+  * `send_telegram()` keeps its bool signature for the three callers that only
+    need yes/no, and a PARTIAL send returns False — "some of it arrived" is
+    not success.
+  * `daily_run` records the outcome in the log line and counts a failed or
+    partial delivery as a stage error.
+
+### Verification
+
+9 new tests in `tests/test_telegram_partial_delivery.py`; 6 mutations, all 6
+red — including one that reports a partial send as a total failure, and one
+that lets the bool wrapper call a partial send successful. Suite 1654 passed,
+1 skipped. Evidence: `repro/repro_partial_telegram.py`.
+
+### What this does NOT claim
+
+No trading number changes. Like the two findings before it, this only removes
+ways the forward test could stop reporting without saying so.
+
+---
+
+## The live log, measured (2026-08-17) — the tested strategy has never been run
+
+Not a new hypothesis. This is the standing complaint — *"it kept telling me to
+hold, but I ended up with less than 1k IDR profit, or -5%"* — answered from the
+25 closed trades in `paper_state.json` rather than from theory.
+
+### Payoff
+
+```
+avg win / avg loss    +3.97% / -4.81%     payoff 0.82
+win rate              56.0%
+break-even win rate   54.8%               margin +1.2 pts
+expectancy            +0.105% per trade over 25 trades
+```
+
+The payoff being below 1.0 is not the problem by itself; it just sets the win
+rate the system has to clear. 56.0% against a 54.8% requirement is a **+1.2
+point margin over 25 trades** — inside the noise. The honest description is
+break-even, not "slightly profitable". +0.105% per trade on a few million
+rupiah is the "less than 1k IDR" in the complaint, exactly.
+
+Best trade +8.39%, worst -5.47%, against `target_profit_pct=8` and
+`hard_stop_pct=-5`. Every close is logged `"manual sell"`, so the ladder is
+being executed by hand rather than by the engine — but it is still the ladder
+setting the bounds.
+
+### Horizon
+
+```
+median hold 7 d      longest 29 d      reached 60 bars: 0 of 23
+```
+
+**Not one trade reached the horizon the strategy was validated at.** 19 of 23
+closed inside 14 days. Against the *legacy* profile's 20-bar limit it is 3 of
+23; against `forward_test`'s 60 bars it is zero. Either way, whatever these
+trades measure, it is not the configuration the sweeps validated.
+
+This is a fact about the log, not a statistical claim, and it is the cleanest
+statement of the gap: the strategy that was tested has never actually been run.
+
+### The gradient, and why it is NOT the finding
+
+```
+bucket         n      mean    median
+0-7 d         12    -0.36%    -2.25%
+8-14 d         7     0.60%     0.40%
+15-30 d        4     3.19%     1.91%
+```
+
+Monotone, and it agrees with the OOS result that the exit ladder subtracts
+value. It is still **not independent evidence for it.** A stop-loss closes
+losers early by construction, so the longer buckets are pre-selected for
+trades that never hit the stop — a rising gradient is what that mechanism
+produces on its own, on any data, edge or no edge. Four trades in the top
+bucket besides.
+
+The caveat is printed beside the table in `discipline_report.py` and pinned by
+a test, so it cannot get separated from the numbers later.
+
+### Where it lives
+
+`payoff_arithmetic()` and `holding_horizon_gap()` in `kala/discipline.py`,
+printed by `discipline_report.py`. Both computed from the log alone, so they
+run offline and do not need `--counterfactual`'s network. `rule_days` follows
+the live `exit_profile`, so the comparison is always against the rule actually
+in force.
+
+Tests: `tests/test_payoff_and_horizon.py` (12 new); 8 mutations, all 8 red —
+including one that drops the selection caveat and one that hardcodes the
+break-even rate to 50%. Suite 1666 passed, 1 skipped.
+
+---
+
+## ATR fallback, named (2026-08-17) — the volatility stop is not running on any live position
+
+Follow-on from the live-log measurement. All 9 open positions in
+`paper_state.json` carry `entry_atr=None`.
+
+### What that means, and what it does not
+
+`governing_stop` falls back to the hard floor when ATR is missing:
+
+```
+have_atr:  atr_stop = entry - atr_stop_multiple * ATR   (2 x ATR by default)
+no ATR:    atr_stop = hard                              (-5% by default)
+base    =  max(atr_stop, hard)
+```
+
+The fallback is safe, deliberate and documented. It is also **not the rule the
+strategy specifies**: the phase-1 stop is supposed to scale with the name's own
+volatility — tighter than the floor on a quiet stock, identical to it on a
+volatile one. Every live position is on the floor.
+
+Sizing is not affected: `size_position` takes its stop from
+`governing_stop(price, price, atr_val, …)` at BUY time, where `atr_val` comes
+from the scanner signal. Only the ongoing exit management of already-open
+positions loses the ATR stop, which is why this went unnoticed.
+
+### The reporting defect
+
+The label was `"fixed/atr stop"` for all three phase-1 outcomes: ATR stop
+governing, hard floor overriding a wider ATR stop, and no ATR at all. One
+string for three rules, so a position on the fallback was indistinguishable
+from one whose ATR stop simply happened to be tighter. There was also no
+book-level count, so "all 9" was invisible without inspecting each position.
+
+Now:
+
+```
+atr stop                          the volatility stop is governing
+hard stop (floor; atr stop was wider)   ATR existed, floor won
+hard stop (NO ATR — fallback)     no ATR; this is the fallback
+```
+
+plus `atr_coverage()` in `discipline.py`, printed by `discipline_report.py`:
+
+```
+open positions 9   without entry_atr: 9 (100%)
+AADI.JK, AUTO.JK, BSML.JK, CASS.JK, ICBP.JK, INDF.JK, KBLI.JK, SRTG.JK, STAA.JK
+```
+
+`entry_atr` is recorded for new positions from v4.4; the existing 9 keep None
+until they close. No backfill is attempted — reconstructing ATR as of each
+entry date would need historical data this session cannot reach, and a
+guessed value in a risk field is worse than an honest gap.
+
+### Verification
+
+13 new tests in `tests/test_atr_fallback_is_named.py`; 6 mutations, all 6 red —
+including one that collapses the three labels back to a single string and one
+that lets a phase-1 label overwrite the trailing labels. Suite 1679 passed,
+1 skipped. No stop level changed; only what the stop is called and whether the
+book-level gap is counted.
+
+---
+
+## Exit-profile comparison on cached data (2026-08-17) — the flag works, and the direction holds
+
+Yahoo is unreachable from this session (proxy 403), so the two full-universe
+walk-forwards still need to be run locally. But `results/price_cache/` holds 71
+pickles — 64 with >= 800 bars, spanning 2020-03 to 2026-08 — plus `^JKSE`. That
+is enough to answer two questions before paying for a long download.
+
+### 1. Is `--exit-profile` inert?
+
+No. It reaches the engine, and the trade sets differ substantially. This
+mattered because the flag once passed its unit tests while `main()` ignored it
+entirely — a full-universe download spent on an inert flag is the expensive
+version of that mistake.
+
+### 2. Walk-forward, 64 cached tickers, 19 folds
+
+```
+                    trades   EXCESS/trade   plain t   clustered t   DSR P(>0)
+legacy                3423        +0.286%     +1.84         +1.64       0.705
+forward_test          1077        +6.596%     +3.44         +3.46       0.984
+```
+
+### The correction that per-trade numbers need
+
++6.6% against +0.29% is a 23x ratio and it is NOT the honest comparison:
+`forward_test` holds roughly four times as long, and per-trade EV mechanically
+rewards longer holds. Measured properly on the same 64 tickers (full-history
+in-sample backtest, run separately to get real entry->exit dates):
+
+```
+profile         trades  mean hold   EV/trade   EV/day held   trade-days
+legacy            4764      12.1 d     0.514%       0.0425%      57,608
+forward_test      1198      47.2 d     7.926%       0.1680%      56,520
+```
+
+Trade-days match within 2%, so capital-time is comparable. Normalised that way
+the advantage is **~4x, not ~15x**. Still a large gap, and in the same
+direction as the 2026-08-13 exit-ladder sweep, which is the point.
+
+### What this is NOT
+
+  * **Not a universe result.** The cache holds whatever past runs happened to
+    fetch — open positions, watchlist names, scan candidates. 64 of 615, and
+    selected by past interest.
+  * **Survivorship-exposed.** Every cached name exists today. The magnitude is
+    inflated by an unquantified amount; only the full run with the same
+    liquidity split can bound it.
+  * **Not a portfolio.** `walk_forward` pools trades. It does not model capital
+    constraints or overlapping positions, so 1077 trades at +6.6% is not a
+    return anyone could have earned.
+  * The per-day table is **in-sample**, used only to normalise the holding-length
+    artefact — not as an edge estimate.
+
+The full-universe run remains the measurement. What changed is that it is now
+worth running: the flag works, and the direction on data already on disk agrees
+with the sweep.
+
+### A note on how this nearly went wrong
+
+The first run of `compare_exit_profiles_cached.py` printed a perfectly aligned
+table of `+nan%` in every EV cell. The cause was `.get(key, float("nan"))` with
+the wrong key names — `trade_stats` returns `ev_pct`/`t_stat`, not `mean`/`t`.
+A broken script read as a measurement that had come back empty. The script now
+uses `_need()`, which raises and names the keys that ARE present. That is the
+fourth time this session a green- or plausible-looking result came from a check
+that could not fail.
+
+Tests: `tests/test_cached_profile_comparison.py` (6 new); 3 mutations, all 3
+red. Suite 1685 passed, 1 skipped.
+
+---
+
+## Liquidity split on the cached comparison (2026-08-17) — the gap survives, at a smaller size
+
+The one objection the cached run could not answer was survivorship. It can be
+attacked partially with the same discriminator the entry-score work used:
+split by median daily turnover and look at both halves. Large, liquid names
+rarely delist, so their survivorship exposure is low; thin names carry most of
+it.
+
+```
+  half      profile             n   excess%  clust t    DSR
+  LIQUID    legacy           1615    +0.024    +0.11  0.118
+  LIQUID    forward_test      561    +2.666    +2.68  0.902
+  ILLIQUID  legacy           1775    +0.649    +2.66  0.930
+  ILLIQUID  forward_test      545   +10.420    +2.87  0.940
+
+  gap (forward_test - legacy):  LIQUID +2.642 pts   ILLIQUID +9.771 pts
+```
+
+### What this establishes
+
+The gap is present in the LIQUID half — +2.64 pts, clustered t +2.68, DSR
+0.902 — where survivorship exposure is low. So survivorship is not what
+PRODUCES the gap. That is the same shape as the 2026-08-16 finding for the
+entry score, reached independently for the exit profile.
+
+The ladder itself earns nothing in liquid names: `legacy` excess +0.024% with
+clustered t +0.11 and DSR 0.118. That is as close to exactly zero as this kind
+of measurement gets.
+
+### What it revises, downward
+
+The headline +6.3 pts from the full cached sample is **inflated**. The gap is
+3.7x larger in the illiquid half (+9.77 vs +2.64), and the conservative read is
+the liquid number: **~+2.6 pts/trade, not ~+6.3**. Two mechanisms could produce
+that spread and this data cannot separate them:
+
+  * survivorship, which is concentrated exactly there; and
+  * a genuine illiquidity/small-cap premium, which would be real but largely
+    untradeable under the ADV cap the paper trader already enforces.
+
+Either way the liquid half is the number to plan against, and it is the half
+that is actually tradeable at size.
+
+### Still not a universe result
+
+64 selected tickers. The split narrows the survivorship objection; it does not
+close it, and it does not bound the bias's magnitude. The full-universe run
+with the same split remains the measurement.
+
+### A tautological test, caught by mutation
+
+The first two tests for the split reimplemented the turnover ranking inline
+instead of calling the script's code, so they tested a copy of the logic rather
+than the logic. Both mutations — ranking by price instead of turnover, and
+letting a volume-less frame crash the run — SURVIVED. The ranking is now
+`rank_by_turnover()` in the script and the tests call it; all four mutations
+now go red, including one that sorts ascending and silently swaps the two
+halves. Fifth instance this session of a check that could not fail.
+
+Tests: `tests/test_cached_profile_comparison.py` (9 total, 3 new); 4 mutations,
+all 4 red.
+
+---
+
+## Holding-period sweep on cached data (2026-08-17) — a hump, not a cliff
+
+`forward_test` (60 bars) beats `legacy` (20). That said nothing about whether
+60 is right. Sweeping the horizon with all exit rules off, 64 cached tickers,
+19 folds:
+
+```
+  bars  trades   excess%  clust t    DSR   ex/day
+    10    2996    +0.851    +2.90  0.980   0.0851
+    20    1908    +1.843    +3.82  0.998   0.0922
+    30    1507    +3.172    +3.64  0.990   0.1057
+    45    1194    +5.400    +3.40  0.978   0.1200
+    60    1077    +6.596    +3.46  0.984   0.1099
+    90     954    +8.339    +3.60  0.987   0.0927
+   120     958    +9.958    +3.58  0.988   0.0830
+```
+
+### Reading the two columns
+
+Excess PER TRADE rises monotonically, 0.85 -> 9.96. That is close to mechanical:
+hold longer, accumulate more. It cannot say which horizon is efficient, and
+quoting it alone would overstate the long end badly.
+
+Excess PER DAY HELD divides that out and is a smooth hump — 0.085 at 10 bars,
+peaking 0.120 near 45, back to 0.083 at 120. Capital-time efficiency is best
+somewhere in the 30-60 band.
+
+### What is actually established
+
+**Every one of the seven horizons is positive, with clustered t between +2.90
+and +3.82.** That is the finding. The effect does not depend on picking a
+horizon; it is present across a 12x range of them.
+
+**The peak is NOT a finding.** Taking the argmax of a 7-point sweep on one
+sample is a best-of-N pick — precisely what deflated Sharpe exists to discount,
+and what sixteen previous hypotheses in this file were rejected for resembling.
+"45 is optimal" is not supported. "The 30-60 band is where capital-time
+efficiency sits, and anything in it beats 20" is.
+
+Beyond ~90 bars the trade count stops falling (954 -> 958), so the holding cap
+is rarely the binding exit any more and the last two rows are nearly the same
+trade set.
+
+### Against the live book
+
+The legacy profile caps at 20 bars, which is already the weakest positive row.
+The live log's MEDIAN hold is 7 days — below the shortest horizon tested here.
+That is the gap, stated in the units of this table.
+
+### Same caveats as everything cached
+
+64 selected tickers, all currently listed, pooled trades rather than a
+portfolio. The liquidity split above suggests the magnitudes are inflated;
+the SHAPE is what this table is for.
+
+`compare_exit_profiles_cached.py --sweep-holding 10 20 30 45 60 90 120`.
+The script refuses to read a shape from fewer than 3 points and prints the
+best-of-N caveat next to the peak, pinned by tests.
+
+---
+
+## FULL-UNIVERSE EXIT-PROFILE COMPARISON (2026-08-17) — the standing verdict was measuring the ladder
+
+The decisive run. 569 usable tickers of 615 requested, 5y, 14 walk-forward
+folds, tick-floored spreads, `--min-price 0`. Same universe, same folds, same
+signal in both; the substantive difference is the exit rules.
+
+```
+                    trades   EXCESS/trade   clustered t     DSR   verdict
+legacy              18,931        -0.45%         -3.79   0.000   NO OOS EDGE
+forward_test         5,945        +4.70%         +5.09   1.000   EDGE CONFIRMED
+```
+
+### What this retires
+
+`PROJECT_STATUS` has said "no demonstrated out-of-sample edge" for the life of
+this project. **That verdict was measured through the exit ladder**, and the
+ladder is not neutral: on its own it is significantly NEGATIVE, clustered
+t = -3.79, negative in 12 of 14 folds. Sixteen hypotheses were rejected while
+the harness that judged them carried a value-destroying exit rule. That does
+not resurrect those sixteen — each was tested on its own merits — but it does
+mean the composite score's own rejection was not a clean read.
+
+### What is strongly established
+
+**The ladder destroys value.** 12 of 14 folds negative, clustered t -3.79,
+DSR 0.000, on 18,931 trades. This is not a noisy zero; it is reliable damage,
+and it agrees with the 2026-08-13 sweep (32 of 32 cells negative) and the
+cached comparison reached independently.
+
+### What is real but FRAGILE
+
+The positive result is concentrated. Per-fold P&L contribution:
+
+```
+  fold 10   n=542   EV=+36.49%   +76.4% of all pooled P&L
+  fold  9   n=558   EV=+15.28%   +32.9%
+  fold  6   n=558   EV=+10.03%   +21.6%
+  ------------------------------------------
+  best three folds             +131.0%
+  the other eleven folds        -31.0%
+  folds with negative EV:  7 of 14
+```
+
+One quarter carries three quarters of the profit. The pooled t is honest
+arithmetic over 5,945 trades, but pooling hides that this is a regime bet
+rather than a steady process, and the next regime is not in the sample.
+
+### Two things that should temper any decision
+
+**The two most recent folds are the two worst.** Fold 12 (2026-01..2026-05)
+-9.29%, fold 13 (2026-05..2026-07) -11.56%, against IHSG -22.3% and -12.6%.
+A forward test started now begins immediately after the worst evidence in the
+sample.
+
+**Win rate 27%, median trade -6.25%.** Three of every four trades lose; the
+expectancy comes from a minority of large winners. The live log shows 26
+closes, 100% of them manual, median hold 8 days. Running this configuration
+means holding three losers for every winner, and the operator has never once
+done that.
+
+### A correction to how the two are compared
+
+The profiles differ in the exit rules AND in the fixed baseline threshold
+(60 vs 80). Compare the "walk-forward threshold" lines, not the "fixed
+baseline" lines: the walk-forward threshold is chosen per fold from TRAIN data
+in both runs and both mostly selected 75, which leaves the exit rules as the
+substantive difference. The cached holding sweep (all exits off, horizon swept
+10-120 bars, every horizon positive) supports the same attribution
+independently.
+
+### Still not bounded
+
+Survivorship. The universe is CURRENT index membership; 183 of 615 tickers had
+history too short for 5y. The cached liquidity split suggested the gap survives
+among liquid names (+2.9 pts, clustered t +3.00) where delisting exposure is
+low, but that was 67 selected tickers. The full-universe liquidity split has
+not been run.
+
+### Next
+
+`diagnose_exit_param_sweep.py --split-liquidity` on the full universe is the
+remaining check. Nothing else in the data can narrow survivorship further.
+
+Reproduce the fold arithmetic: `python repro/fold_concentration.py`.
+
+---
+
+## FULL-UNIVERSE LIQUIDITY SPLIT (2026-08-17) — survivorship does not produce the result
+
+The last check the data could answer. 569 usable tickers split by median daily
+turnover, threshold swept with all exit rules OFF and a 60-bar hold.
+
+```
+half      thr   win%  payoff  BE win%   margin   exEV%   ex_t      n
+LIQUID      0   33.8    1.90     34.5     -0.7  +0.124  +0.33   7355
+LIQUID     40   30.1    2.75     26.7     +3.4  +1.127  +2.61   5387
+LIQUID     60   30.6    3.13     24.2     +6.4  +2.039  +3.70   3779
+LIQUID     80   34.1    2.94     25.4     +8.7  +2.900  +4.31   2874
+ILLIQUID    0   27.8    2.50     28.6     -0.8  +0.048  +0.12   8546
+ILLIQUID   40   23.1    3.63     21.6     +1.5  +0.537  +1.12   6731
+ILLIQUID   60   27.2    3.79     20.9     +6.3  +2.509  +3.26   4109
+ILLIQUID   80   32.4    3.44     22.5     +9.9  +4.563  +3.76   2772
+```
+
+### Three findings, in order of how hard each is to dismiss
+
+**1. Universe drift is ruled out.** The threshold-0 control is indistinguishable
+from zero in BOTH halves: +0.124% (t +0.33) and +0.048% (t +0.12), with
+break-even margins of -0.7 and -0.8 points. If the result were "IDX sharia
+names rose over five years", that row would be positive. It is not.
+
+**2. Dose-response, monotone, in both halves.** 0 -> 40 -> 60 -> 80 rises in
+six columns simultaneously — EV, excess EV, t, payoff-implied margin, and win
+rate at the top end. A best-of-N pick does not produce a monotone ladder in
+two independent subsamples.
+
+**3. The LIQUID half is statistically STRONGER.** t +4.31 vs +3.76 at
+threshold 80. Survivorship is concentrated in names that could have been
+delisted — the thin end — so if the bias produced this result it would be
+strong there and weak among large liquid names. The opposite is observed.
+
+### The conservative number
+
+Magnitude is larger in the illiquid half (+4.563 vs +2.900). Two mechanisms
+could do that and this data cannot separate them: survivorship inflation, or a
+genuine illiquidity premium that the ADV cap would prevent trading at size.
+Either way the number to plan against is the LIQUID half: **+2.90 pts/trade at
+threshold 80, clustered t +4.31**, and that is the half that is tradeable.
+
+For scale, the live book's own margin is +1.5 points over 26 trades. This is
++8.7 points over 2,874.
+
+### What it still does NOT settle
+
+Every name in BOTH halves is a survivor — the universe is current index
+membership. The split tests whether the effect CONCENTRATES where delisting
+risk was highest; it does not remove survivorship from either half, and it
+cannot. A name that is liquid today may have been thin five years ago.
+
+The fold concentration from the walk-forward also still stands: these are
+pooled OOS trades over the same 14 folds, so the same three windows dominate.
+
+### Where this leaves the project
+
+Established, in order:
+
+  * the exit ladder destroys value — 12 of 14 folds negative, clustered
+    t -3.79 on 18,931 trades;
+  * the entry score selects — monotone dose-response in two liquidity halves,
+    with a clean zero control;
+  * it is not survivorship — present and stronger in the low-exposure half;
+  * it is not universe drift — threshold 0 is zero;
+  * it is not benchmark exposure — every figure above is excess.
+
+Not established:
+
+  * that it is steady. One fold carries 76% of the walk-forward P&L, 7 of 14
+    folds are negative, and the two most recent are the two worst.
+  * that it is executable. Win rate 30-34%, median trade negative. The live
+    log shows 26 closes, 100% manual, median hold 8 days.
+  * that it persists out of this 5-year window. Only a forward test answers
+    that, and by construction it cannot be run faster than real time.
+
+---
+
+## What the ladder does to all sixteen verdicts (2026-08-17)
+
+The uncomfortable consequence of the exit-profile result, stated plainly
+because the alternative is leaving sixteen confident rejections standing on a
+foundation now known to be tilted.
+
+### The mechanism
+
+Every hypothesis in this file was validated through the same harness, and that
+harness applied the exit ladder to the STRATEGY side only. The alpha check
+compares each trade against the benchmark held over that trade's own window —
+buy-and-hold, no stop, no target, no trailing. So the ladder's cost was
+subtracted from the strategy and from nothing else.
+
+Measured size of that cost: -0.45%/trade excess on the composite, and the
+control-vs-best-cell gap in the 2026-08-13 sweep was 1.599 points.
+
+### What that does and does not mean
+
+It does NOT resurrect any of the sixteen. Each was tested on its own merits,
+several with real statistical power, and a handicap does not turn a null into
+a finding.
+
+It DOES mean none of them is a clean read. The rejections most affected are
+the ones whose measured effect is of the same order as the handicap:
+
+```
+hypothesis                       reported verdict            reported t
+mean-reversion                   actively negative           ~ -3.9
+support/resistance               actively negative, powered   -3.52 / -3.40
+dividend yield                   negative, real power         -2.75 / -2.56
+multi-horizon trend (naive)      negative                     -2.66 / -2.50
+low volatility                   confidently negative both    (see section)
+```
+
+A signal measured at -3 through a harness that itself scores -3.79 on the same
+universe is not distinguishable from a signal that is merely flat. That is not
+a claim any of them is positive; it is a statement that the file currently
+reports more confidence than the measurements support.
+
+### What would settle it, cheaply
+
+The warehouse is now fully populated, so re-running these costs no downloads:
+
+```
+python run_walkforward.py --max-tickers 615 --period 5y --tick-spread \
+  --warehouse results/warehouse.db --min-price 0 --trust-short-cache \
+  --exit-profile forward_test --strategy mean_reversion
+```
+
+and the same for `support_resistance`, `dividend_yield`,
+`multihorizon_trend`, `low_volatility`. Five runs, same universe, same folds,
+only the exit rules changed.
+
+Predicted outcome, recorded BEFORE running so it can be wrong: most should
+move upward by roughly the ladder's cost and land near zero rather than
+turning positive, because the composite score's dose-response is what
+distinguishes it and these signals showed no such ladder. If one of them
+instead turns strongly positive, that is a new finding and it should be
+treated with the same suspicion this file has applied to every other
+promising raw number.
+
+### Status of the table above
+
+Left in place, with the correction banner at the top of SUMMARY pointing here.
+Rewriting sixteen verdicts on the basis of an inference rather than a re-run
+would be exactly the kind of unearned confidence this file exists to prevent.
+They are marked as measured-through-the-ladder, not as overturned.
+
+---
+
+## The re-run instruction was wrong, and mean_reversion is now open (2026-08-17)
+
+### The defect in the command
+
+`--exit-profile forward_test` sets `score_entry_threshold = 80`, and
+`walk_forward_strategy` documents that an explicit `cfg` overrides the
+strategy's own `default_threshold` — "used exactly as given, no magic". So the
+FIXED BASELINE arm ran every strategy at 80, a number from the composite
+score's scale:
+
+```
+strategy              own default   own grid    forced to
+mean_reversion             60        40-80         80   top of grid
+support_resistance         50        20-60         80   OUTSIDE the grid
+dividend_yield             50        30-70         80   OUTSIDE the grid
+low_volatility             60        40-80         80   top of grid
+multihorizon_trend         60        20-90         80   inside
+```
+
+`_edge_verdict` is computed from that arm (`pooled_excess_baseline`), and
+computing it there is CORRECT — judging on the per-fold chosen threshold is
+the multiple-testing trap. The error was the threshold, not the choice of arm.
+For support_resistance and dividend_yield the baseline sat above the entire
+grid, so it would have traded almost nothing and printed a verdict about
+nothing.
+
+The four remaining re-runs were stopped before being run.
+
+### What mean_reversion actually returned
+
+```
+                                    n     excess EV    plain t   clustered t
+walk-forward threshold (40-80)   8800       +2.09%      +4.33        +3.58
+fixed baseline 80                4766       -0.01%      -0.01            -
+```
+DSR 0.999. Printed verdict: NO OOS EDGE — computed from the baseline row.
+
+**The prediction recorded in "What the ladder does to all sixteen verdicts"
+was wrong.** It said most should "land near zero rather than turning
+positive". On the walk-forward arm mean_reversion turned positive and
+significant. Recording that plainly is the whole point of having written the
+prediction down first.
+
+### Why this is NOT yet a finding
+
+Its chosen threshold is UNSTABLE across folds — 60, 60, 60, 60, 70, 80, 60,
+60, 60, 60, 40, 50, 60, 40. The composite score chose 75 in 13 of 14 folds.
+A signal whose optimal threshold wanders across its whole grid every quarter
+is the signature of fitting noise in the train window, and the deflated Sharpe
+deflates for the thresholds tried WITHIN a fold, not for that instability
+ACROSS folds.
+
+So mean_reversion is not "positive". It is **open**, and its earlier
+"actively negative" verdict is withdrawn as unclean rather than replaced.
+
+### The fix
+
+  * `build_run_config(..., baseline_threshold=...)`, and `run_walkforward.py`
+    defaults it to `strategy.default_threshold` for any strategy other than
+    momentum. Momentum is unchanged, so no historical number moves.
+  * `--baseline-threshold` exposes it explicitly.
+  * Every run now prints which arm the verdict comes from, the strategy's own
+    default and grid, and a WARNING when the baseline falls outside the grid.
+
+Tests: `tests/test_baseline_threshold_scale.py` (7 new, parametrised over the
+registered strategies); 4 mutations, all 4 red. Suite 1751 passed, 2 skipped.
+
+### The corrected re-run command
+
+```
+python run_walkforward.py --max-tickers 615 --period 5y --tick-spread \
+  --warehouse results/warehouse.db --min-price 0 --trust-short-cache \
+  --exit-profile forward_test --strategy mean_reversion
+```
+
+Identical text — the fix is in the default, not the invocation — but the
+baseline arm now runs at 60 for mean_reversion, 50 for support_resistance and
+dividend_yield, and the header states which threshold the verdict used.
+
+---
+
+## mean_reversion re-tested at its own baseline (2026-08-17) — and a problem with BOTH results
+
+### The result
+
+```
+                                    n     excess EV    plain t   clustered t
+walk-forward threshold (40-80)   8800       +2.09%      +4.33        +3.58
+fixed baseline 60                8858       +1.84%      +3.99            -
+```
+DSR 0.999. VERDICT: EDGE CONFIRMED OOS, on both arms.
+
+Its previously recorded verdict was "actively negative, t ~= -3.9". The swing
+is roughly 8 t-units and is entirely attributable to removing the exit ladder.
+That confirms, by direct measurement rather than inference, the claim made in
+"What the ladder does to all sixteen verdicts".
+
+**The threshold-instability objection is withdrawn.** It applied to the
+walk-forward arm, where the chosen threshold wanders 40-80 fold to fold. The
+FIXED baseline arm selects no threshold at all — there is nothing to deflate —
+and it returns +1.84% excess at t 3.99 on 8,858 trades. A pre-specified
+threshold, set when the strategy was written, is not a multiple-testing
+artefact.
+
+### The problem, which applies to the composite result too
+
+Momentum and mean-reversion are near-opposite signals: one buys what has
+risen, the other buys what has fallen. Their per-fold EV over the same 14
+folds, same universe, same exit profile:
+
+```
+correlation of per-fold EV        +0.857
+sign agreement                     14 of 14 folds
+```
+
+Two opposite selections do not agree in sign fourteen times out of fourteen if
+each is capturing its own distinct stock-selection edge. **They are not two
+independent confirmations; they are close to one observation.**
+
+### What that does and does not imply
+
+It is NOT explained by market exposure: every excess figure is already
+benchmark-subtracted per trade, over each trade's own window.
+
+It is NOT explained by "any basket held 60 days beats the index": the
+threshold-0 control is flat in both liquidity halves — +0.124% (t +0.33) and
++0.048% (t +0.12). Random selection from this universe earns nothing. So the
+selection is doing something.
+
+The remaining reading is that both selections, despite opposite stated logic,
+tilt toward the same underlying characteristic — plausibly high volatility or
+small size — which had a good five years. That would make one factor, not two
+edges, and it would mean the composite's +2.90 pts in the liquid half is a
+tilt this project has not identified rather than skill it has demonstrated.
+
+### The diagnostic that would settle it
+
+Ticker overlap between the two selections, fold by fold. If the momentum-80
+basket and the mean_reversion-60 basket share most of their names, that is the
+answer. If they are largely disjoint yet still move together, the common
+factor is something else and worth naming before any of this is traded.
+
+A second, cheaper check: the remaining four strategies. If low_volatility,
+dividend_yield, support_resistance and multihorizon_trend ALSO come back
+positive with the same fold shape, that is the common factor showing itself
+five more times — not five more edges. **Recorded before running, so it can be
+wrong.**
+
+### Status
+
+`mean_reversion`: its "actively negative" verdict is overturned, not merely
+withdrawn — it is positive at a pre-specified threshold with real power.
+
+The composite result and this one are now BOTH conditional on the common-factor
+question. Neither should be traded until it is answered.
+
+---
+
+## All four re-runs positive — and a false alarm I raised, corrected (2026-08-17)
+
+### The results
+
+Every strategy re-tested without the exit ladder, at its own baseline:
+
+```
+strategy              baseline   n(base)  excess EV(base)   plain t   clustered t   verdict
+momentum                    80     5,259          +5.44%      6.27         5.09    CONFIRMED
+mean_reversion              60     8,858          +1.84%      3.99         3.58    CONFIRMED
+low_volatility              60    10,926          +0.35%      1.16         2.28    WEAK
+dividend_yield              50     2,760          +1.51%      3.31         3.12    CONFIRMED
+support_resistance          50     4,828          +4.23%      5.96         5.23    CONFIRMED
+multihorizon_trend          60     9,741          +3.09%      5.84         4.51    CONFIRMED
+```
+
+Five confirmed, one weak. Every previously "actively negative" verdict is
+overturned. The prediction recorded before running — that most would land near
+zero — was wrong for the second time; they landed positive.
+
+### The alarm I raised, and why it was wrong
+
+I computed the correlation of PER-FOLD EV between strategies, found +0.857 to
++0.965, and concluded that six signals could not all be edges and something
+common was producing them.
+
+**That was the wrong quantity.** The fold table's `EV/trade` column is the RAW
+per-trade return. Two long-only baskets drawn from the same universe rise
+together when the index rises, so their raw fold returns correlate strongly
+whether or not either has an edge. Correlating them measures the market. Each
+strategy's own correlation with IHSG (+0.55 to +0.75) was sitting in the same
+table and should have told me.
+
+The overlap diagnostic then contradicted the story outright:
+
+```
+                                    TOP baskets   BOTTOM baskets
+random baseline                           0.133            0.133
+mean_reversion / momentum                 0.021            0.021
+mean_reversion / multihorizon_trend       0.007            0.037
+MEAN over all pairs                       0.161            0.191
+```
+
+momentum and mean_reversion pick almost disjoint baskets — BELOW the random
+baseline, as two opposite signals should — and their bottom baskets are equally
+disjoint, which also kills the "they share what they avoid" version. Neither
+shared selection nor shared exclusion is happening.
+
+### What is actually still open
+
+Whether the EXCESS returns share a common factor is **not answered by any
+output produced so far**, because per-fold excess was never printed — only the
+pooled figure. The data existed in `FoldResult.oos_excess_chosen` and was
+discarded at the formatting step.
+
+The fold table now prints an `excess%` column, so the correlation can be
+computed on the right quantity. Until someone does that, the honest position is
+that the common-factor question is UNTESTED, not answered either way — and my
+earlier statement that these are "one observation measured six times" is
+withdrawn as unsupported.
+
+### What this run does establish
+
+  * Every one of the six is positive at a pre-specified threshold, OOS,
+    benchmark-adjusted, with the ladder removed. That is a real and large
+    change from the file's previous verdicts.
+  * The selections are genuinely different — verified, not assumed.
+  * The exit ladder was penalising all of them, which was the claim made
+    earlier by inference and is now measured six times.
+
+Still unresolved: fold concentration (every strategy has its best folds in
+mid-2025 and its worst in early-2026), survivorship beyond the liquidity split,
+and whether these six are independent once measured on excess.
+
+Tools: `diagnose_selection_overlap.py` (`--bottom` for the exclusion variant).
+Tests: 2 new in `tests/test_baseline_threshold_scale.py`; both mutations red.
+Suite 1753 passed, 2 skipped.
+
+---
+
+## Per-fold excess, at last (2026-08-17) — the edge is REGIME-CONDITIONAL
+
+The fold table now prints excess, so the question that could not be answered
+before can be. `mean_reversion`, 14 folds, forward_test profile:
+
+```
+korelasi RAW    vs IHSG : +0.685
+korelasi EXCESS vs IHSG : +0.477
+```
+
+Benchmark subtraction removes some market exposure and **not all of it**. If
+this were pure stock selection the excess would be roughly uncorrelated with
+the index. It is not.
+
+### The number that matters
+
+```
+                          mean excess    folds
+market DOWN (IHSG < 0)         -0.16%        7
+market UP                      +4.93%        7
+```
+
+**The excess is zero when the market falls and large when it rises.** The
+pooled +1.80% is the average of "nothing in a decline" and "a lot in a rally".
+
+Against the tidy version of that story: the two WORST market quarters were
+positive — fold 12 (IHSG -22.3%) excess +4.24%, fold 8 (IHSG -11.5%) excess
++3.35%. What drags the down-market average is fold 13 (-6.67%) and fold 0
+(-2.75%). So in falling markets the signal is not dead, it is NOISY: sometimes
+strongly positive, sometimes strongly negative, averaging nothing.
+
+Concentration survives into the excess column: best fold 40.7% of pooled excess
+P&L, best three 102%, the other eleven net negative.
+
+### Why this is the answer to the original question
+
+The complaint that opened this work was that the system cannot tell when to
+buy, hold or sell. At the trade level that turned out to be the exit ladder.
+At the PORTFOLIO level the answer is now visible: the signal works, but its
+payoff is conditional on the market regime, and nothing in the system tells
+you which regime you are in before the fact.
+
+Two of the last three folds in the sample are falling markets. A forward test
+started now, in a declining market, should expect approximately nothing — and
+that is a prediction, recorded so it can be wrong.
+
+### The obvious next test
+
+`momentum + ADX regime gate` is already in the file, rejected as "no OOS edge
+(underpowered)" — measured THROUGH the ladder, like everything else. The
+regime classifier exists (`kala/regime.py`). Re-running the gated variant
+without the ladder is the direct test of whether conditioning on regime
+converts a conditional edge into a usable one.
+
+If it does not, the honest conclusion is that this system finds stocks well in
+rising markets and has no way to know when those are — which is a real finding
+and a much weaker one than "EDGE CONFIRMED" reads on its own.
+
+### Caveat on the numbers above
+
+These come from a run whose warehouse had been refreshed by the intervening
+`low_volatility` and `dividend_yield` runs: n = 8,891 versus 8,858 in the
+earlier `mean_reversion` run, pooled excess +1.80% versus +1.84%, and fold
+boundaries shifted by a day. Small, but it means results in this file are not
+byte-reproducible across sessions unless the warehouse is pinned.
+
+## Two "different" strategies, one edge (2026-08-19) — the alarm re-established on the right column
+
+Momentum and mean_reversion were re-run with `--save-folds`, on identical fold
+calendars, and compared mechanically instead of by eye:
+
+```
+strategy              profile        base  folds  tickers
+momentum              forward_test     80     14      615
+mean_reversion        forward_test     60     14      615
+
+pair                                        RAW corr  EXCESS corr
+momentum / mean_reversion                     +0.866       +0.803
+```
+
+**Subtracting the benchmark barely moved it: 0.866 -> 0.803.**
+
+That is the finding. A high RAW correlation between two long-only baskets is
+mechanical — both are long the same market — which is exactly why the first
+version of this alarm was withdrawn. The EXCESS column is the one that can
+carry the claim, and it carries it: after the market is removed, two strategies
+that are near-opposites by construction still move together at 0.80.
+
+### Why that is strange
+
+These are not two views of the same idea. Their selections were measured
+directly (`diagnose_selection_overlap.py`):
+
+| pair | mean Jaccard | vs random |
+|---|---|---|
+| momentum / mean_reversion | 0.021 | 0.2x |
+| (random baseline for top-15 of 240) | 0.133 | 1.0x |
+
+They overlap *less* than two random picks would. Momentum buys what has been
+rising; mean_reversion buys what has fallen. They hold different stocks, in
+different quarters, for different reasons — and their excess returns correlate
+at 0.80.
+
+Near-disjoint holdings with strongly correlated residual returns means the
+residual is not coming from the holdings. Something common to both is doing
+the work.
+
+### What it costs, practically
+
+Running momentum and mean_reversion together is **not diversification**. Split
+a book in half between two strategies whose excess correlates at rho, and the
+combined volatility relative to putting it all in one is `sqrt((1+rho)/2)`:
+
+| rho | variance vs one position | volatility vs one position |
+|---|---|---|
+| 0.00 (truly independent) | 0.50 | 0.71 |
+| 0.50 | 0.75 | 0.87 |
+| **0.803 (measured)** | **0.90** | **0.95** |
+| 1.00 (same bet twice) | 1.00 | 1.00 |
+
+At 0.803 the split buys a 5% reduction in volatility, against the 29% that two
+independent edges would give. That is a rounding error away from holding one
+position, for the same expected return and twice the operational surface. Any
+plan that sizes these as independent bets is sizing on a number that is not
+true.
+
+This also cuts the evidence base. Six strategies all going positive once the
+exit ladder was removed read as six confirmations. If they share a common
+driver, that is closer to **one** observation measured six times — and the
+deflated Sharpe of 1.000, which discounts for multiple testing across
+thresholds, does not discount for this at all.
+
+### The leading hypothesis, and it has NOT been tested
+
+**The benchmark is probably wrong.** IHSG is cap-weighted and bank-heavy. These
+baskets are equal-weighted and sharia-screened, so banks are excluded *by
+construction*. Subtracting IHSG from any sharia basket therefore leaves a
+systematic residual — the sharia-vs-conventional sector tilt, plus a
+small-cap-vs-large-cap tilt from equal weighting — and every strategy in this
+system would inherit the same residual regardless of what it picks.
+
+If that is the explanation, then "excess vs IHSG" has been measuring the
+sharia screen and the weighting scheme, not stock selection, in every result
+in this file.
+
+The discriminating test:
+
+```
+python run_walkforward.py --max-tickers 615 --period 5y --tick-spread \
+  --warehouse results/warehouse.db --min-price 0 --trust-short-cache \
+  --exit-profile forward_test --strategy momentum \
+  --benchmark XIJI.JK --save-folds results/f_mom_xiji.json
+```
+
+...and the same for mean_reversion, then `compare_folds.py` on the pair.
+
+**Recorded prediction, so it can be wrong:** against XIJI.JK the excess
+correlation drops below 0.5, and both strategies' pooled excess falls
+substantially — most of what is now called alpha is the sharia screen plus
+equal weighting, not selection. If instead the correlation stays near 0.80,
+the shared driver is something else and must be named before any of this is
+sized.
+
+### The honest order of events
+
+The first version of this alarm (2026-08-17) reached the right conclusion from
+the wrong evidence — it correlated the RAW column, where +0.86 is expected
+whether or not either strategy has an edge. Withdrawing it was correct;
+evidence that does not support a claim is not evidence, even when the claim
+happens to be true. What is written above stands on the excess column, and the
+tooling that made the difference (`--save-folds`, `compare_folds.py`) exists
+precisely because the first attempt was done by reading pasted terminal output.
+
+## Finding 8 (2026-08-19) — the alpha check could be skipped silently
+
+Found while preparing the `--benchmark XIJI.JK` run proposed in the section
+above. The proposed command exposed a bug in the harness that would have
+scored it.
+
+`--benchmark` accepts any string; nothing validates it. With a ticker that
+does not resolve, `run_walkforward.py` warned on **stderr** and carried on,
+and `summary_text()` dropped the whole ALPHA CHECK block (gated on
+`pooled_excess_baseline["n"] > 0`, no else branch). stdout showed:
+
+```
+VERDICT: EDGE CONFIRMED OOS — positive EV, statistically distinguishable from 0.
+```
+
+and stopped there.
+
+Every result in this file was captured by redirecting stdout to a log. The
+stderr warning would not have been in any of them. What would have been saved
+is a confident verdict with no indication that the measurement distinguishing
+alpha from beta never ran.
+
+This is the eighth finding with the same shape, and the most consequential,
+because it sits on the harness that produced all the others. A missing section
+reads as a shorter report.
+
+**The test suite was enforcing the silence.** A test asserted `"ALPHA" not in
+summary_text()` when no benchmark was supplied, calling the check "additive and
+opt-in". That was accurate when it was written and stopped being accurate the
+moment the alpha check became the basis for overturning the exit-ladder result.
+
+Fixed and covered — see `CHANGES.md` -> "Finding 8". Five mutations killed,
+including reinstating the original bug. Repro:
+`repro/repro_missing_benchmark.py`.
+
+### Does this invalidate the results in this file?
+
+**No, and it is worth being precise about why.** Every headline result here
+prints an ALPHA CHECK section with populated excess numbers — +2.90 pts/trade
+in the liquid half, clustered t +4.31, and the regime split of +4.93% / -0.16%.
+Those numbers cannot exist unless the benchmark resolved. The bug produces a
+report with the section *absent*, not one with wrong numbers in it.
+
+So this is a live trap that was never sprung, not a retraction. The one place
+it was about to be sprung is the XIJI.JK run, where the ticker is a guess.
+
+## The benchmark WAS wrong — and correcting it made the edge stronger (2026-08-19)
+
+I predicted, in writing, that measuring against a sharia benchmark instead of
+IHSG would cut the excess substantially — that most of the apparent alpha was
+the sharia screen. **That prediction was wrong, and in the opposite direction.**
+
+Same 6,082 trades, same folds, two benchmarks:
+
+| | vs IHSG (^JKSE) | vs JII (^JKII) |
+|---|---|---|
+| pooled excess, walk-forward | +4.58% | **+5.34%** |
+| pooled excess, fixed baseline | +5.52% | **+6.23%** |
+| clustered t | 5.04 | **5.87** |
+| folds negative | 6 of 14 | **5 of 14** |
+| best fold's share of excess P&L | 60.1% | **51.6%** |
+| best 3 folds | 99.5% | **83.2%** |
+
+Every column moved in the strategy's favour.
+
+### The part that changes a standing conclusion
+
+The "regime-conditional edge" finding was the strongest negative result in this
+file: excess +6.95% in rising folds, −0.35% in falling ones — an edge that
+existed only in up markets, with no way to know which regime you were in.
+
+Against JII that becomes:
+
+| | up folds | down folds |
+|---|---|---|
+| vs IHSG | +6.95% (7) | **−0.35%** (7) |
+| vs JII | +8.88% (6) | **+0.74%** (8) |
+
+**The down-market excess is positive.** The edge is not conditional on a rising
+market; it looked that way because of what it was being measured against.
+
+### Why IHSG produced that illusion
+
+Sharia stocks fell HARDER than the market in most drawdowns, because IHSG is
+held up by the conventional banks a sharia portfolio can never own:
+
+```
+fold  1: IHSG  -3.8%   JII  -8.9%   (-5.1 pts)
+fold  3: IHSG  +2.1%   JII  -5.8%   (-7.9 pts)
+fold  4: IHSG  +4.7%   JII  +0.2%   (-4.5 pts)
+fold  8: IHSG -11.5%   JII -17.9%   (-6.4 pts)
+fold 13: IHSG -12.3%   JII -20.9%   (-8.6 pts)
+```
+
+Subtracting IHSG in those windows charged the strategy for a decline it had no
+way to avoid and no way to hedge. Fold 3 is the clearest case: IHSG up 2.1%
+while the sharia universe fell 5.8%. Measured against IHSG the strategy looks
+like it lost ground in a rising market; it was actually beating a falling one.
+
+### What is NOT settled
+
+JII holds the **30 largest** sharia names, cap-weighted. This universe is 569
+mostly smaller names. Small caps usually fall harder than large caps, so some
+of the improvement above may be a size effect rather than selection skill.
+`--benchmark EQUAL_WEIGHT` — an equal-weighted index over the same 569 tickers
+— is the test that separates those, and it has not been run yet.
+
+And the concentration problem survives: one fold is still half the excess P&L,
+and fold 13 (the most recent, 2026-05-05..2026-07-30) is negative against BOTH
+benchmarks (−7.46% vs IHSG, −5.54% vs JII). Whatever went wrong in the last
+quarter is not a benchmark artefact.
+
+### On the prediction being wrong
+
+The reasoning was sound and the conclusion was backwards. I had the direction
+of the sharia-vs-conventional gap inverted: I assumed the screen had helped
+over this sample, when across most drawdowns it hurt. Recording it because a
+prediction that is only cited when it lands is not a prediction.
+
+## THE ANSWER (2026-08-19) — against the right benchmark, the edge does not survive
+
+`--benchmark EQUAL_WEIGHT` builds an equal-weighted, daily-rebalanced index
+over the SAME 569 tickers the strategy selects from. It answers the only
+question that matters: **did picking these beat buying all of them?**
+
+Same 6,082 trades, three benchmarks:
+
+| | vs IHSG | vs JII | **vs EQUAL_WEIGHT** |
+|---|---|---|---|
+| excess, walk-forward arm | +4.58% | +5.34% | **+1.30%** |
+| excess, fixed baseline | +5.52% | +6.23% | **+1.73%** |
+| plain t | 6.36 | 7.17 | 2.05 |
+| **clustered t** | 5.04 | 5.87 | **1.60** |
+| **deflated Sharpe** | 1.000 | 1.000 | **0.670** |
+
+Against the benchmark that actually matches the universe, the excess falls to
+about a quarter of what IHSG suggested, the clustered t drops **below 2**, and
+the deflated Sharpe drops to **0.670** — well under the 0.95 the report itself
+names as the bar.
+
+**Both corrections fail.** The measured edge is not distinguishable from
+picking the best of six thresholds by luck.
+
+### So my original prediction was right, and my retraction of it was wrong
+
+Three positions in sequence, all recorded:
+
+1. Predicted the sharia screen was doing the work and excess would collapse
+   against a sharia benchmark.
+2. Ran `^JKII`, saw excess RISE to +5.34%, and wrote "that prediction was
+   wrong, and in the opposite direction."
+3. Ran EQUAL_WEIGHT: excess +1.30%, clustered t 1.60, DSR 0.670.
+
+Position 2 was the mistake. JII is 30 large caps; this universe is 569 mostly
+smaller names. Against JII the strategy was being credited for the small-cap
+premium of its own universe — a premium available by buying the whole basket
+and requiring no signal at all. I flagged that limitation when reporting the
+JII result and then still let the headline read as vindication.
+
+The lesson is the same one this audit keeps producing: a benchmark that does
+not match the portfolio does not measure skill, and it can err in EITHER
+direction.
+
+### What is actually true, stated plainly
+
+  * **Raw returns are real.** +4.29%/trade OOS, t 5.54. Buying these names beat
+    holding cash, and that is not in dispute.
+  * **Almost all of it is available without the signal.** The equal-weighted
+    sharia universe returned nearly as much. The selection adds ~+1.3%/trade,
+    and that residual does not clear either significance bar.
+  * **The regime-conditional finding survives, and gets worse.** Against
+    EQUAL_WEIGHT: up folds +4.07% (6), down folds **-2.28%** (8). The excess is
+    negative in down markets against the correct benchmark.
+  * **Concentration survives.** Fold 10 alone still dominates.
+  * **Fold 13 is negative against all three benchmarks** (-7.46 / -5.54 /
+    -8.29). The most recent quarter is not a benchmark artefact.
+
+### What this means for the original complaint
+
+The complaint was that the system says HOLD and delivers under 1,000 IDR of
+profit, or -5%.
+
+That is now explained without any appeal to bugs in the exit logic. The signal
+is not selecting well enough to beat simply owning the sharia universe. In a
+rising market both make money and the difference is invisible. In a falling
+market — folds 12 and 13, which is when the complaint was made — the selection
+is actively worse than the basket, and a 5% win rate at -11.39%/trade is what
+that looks like from the inside.
+
+### What would change this conclusion
+
+  * **More folds.** clustered t 1.60 is not "no edge", it is "not shown". A
+    longer sample could move it either way.
+  * **The gated variant.** `--apply-entry-vetoes --veto-ranging-stock` has
+    still not been run against EQUAL_WEIGHT. If regime gating turns -2.28% in
+    down folds into something non-negative, that is a real result.
+  * **A different holding period.** 60 days was tuned when the ladder was in
+    place.
+
+What would NOT change it: re-running against IHSG and quoting +4.58%.
+
+### Caveat on this run specifically
+
+The benchmark reported `2-569 names/day` — IDX holidays left a handful of
+tickers carrying phantom bars, and those were averaged into the index, inside
+fold 13. Fixed (holidays now held flat), so **this run should be repeated**.
+The direction will not change — the holiday effect is a handful of days out of
+1,208 — but the exact figures above will move slightly.
+
+## FINAL EQUAL_WEIGHT NUMBERS (2026-08-19) — holiday fix applied, verdict now honest
+
+The run above was repeated after the exchange-holiday fix. Direction unchanged,
+as predicted; figures moved slightly. **These supersede the previous section's
+numbers.**
+
+```
+EXCESS OOS (walk-forward threshold)   +1.27%/trade   plain t 1.71   clustered t 1.57
+EXCESS OOS (fixed baseline 80)        +1.71%/trade   plain t 2.02   clustered t 1.92
+                                                     deflated Sharpe 0.766
+ALPHA VERDICT: EV positive but WEAK (clustered t 1.92 < 2): could be noise.
+```
+
+Note the two arms' clustered t differ (1.57 vs 1.92). Computing each arm's own
+correction was not pedantry: the verdict is rendered from the baseline arm, and
+using the chosen arm's 1.57 would have reached the right answer for the wrong
+reason.
+
+### The result in one line
+
+**Eight of fourteen folds have NEGATIVE excess.** In a majority of quarters,
+buying the whole sharia universe beat the stocks this system picked.
+
+| | |
+|---|---|
+| pooled excess, all 14 folds | **+1.27%/trade** |
+| excluding fold 10 | **−0.44%/trade** |
+| excluding folds 10 and 9 | **−1.00%/trade** |
+| excluding folds 10, 9 and 6 | **−1.39%/trade** |
+
+Fold 10 alone is **131.5%** of all pooled excess P&L — more than the total,
+which means the other thirteen folds sum to negative. Remove one quarter
+(2025-07-23..2025-10-21) and stock selection loses to buying everything.
+
+### The basket, fold by fold
+
+```
+fold  basket%  strategy%  excess%
+   0     -2.8     -5.78    -4.29   basket beat the picks
+   2     +3.6     -0.51    -0.80   basket beat the picks
+   3     -0.9     -3.47    -2.17   basket beat the picks
+   4     -3.1     -4.04    -1.93   basket beat the picks
+   5     -8.4     +0.03    -2.10   basket beat the picks
+   7     +2.2     -1.40    -2.17   basket beat the picks
+  12     -9.3     -8.97    -2.95   basket beat the picks
+  13     -6.9    -11.39    -8.73   basket beat the picks
+```
+
+Fold 11 is the sharpest illustration: the equal-weighted sharia basket returned
+**+28.4%** and the strategy returned **+4.25%**. The signal was in the market
+and did not participate.
+
+Compounded across the fourteen test windows, buying the whole basket returned
+**+87.6%**.
+
+### Regime split, against the correct benchmark
+
+| | up folds | down folds |
+|---|---|---|
+| vs IHSG | +6.95% (7) | −0.35% (7) |
+| vs JII | +8.88% (6) | +0.74% (8) |
+| **vs EQUAL_WEIGHT** | **+4.07% (6)** | **−2.35% (8)** |
+
+Against the benchmark that matches the portfolio, the excess is clearly
+NEGATIVE in falling markets. The regime-conditional finding was right all
+along; the JII run made it look resolved because JII's large caps fell harder
+than this universe did, flattering the comparison.
+
+### The honest bottom line
+
+This system's raw returns are real and come almost entirely from being long a
+sharia universe that did very well. The stock SELECTION adds about +1.3% per
+trade, concentrated in a single quarter, not significant under either
+correction, and negative in most quarters and in most falling markets.
+
+For the original complaint — "it keeps telling me to hold and I end up with
+under 1,000 IDR or −5%" — the mechanism is now identified and it is not a bug
+in the exit logic. In the quarters when the complaint was made, the selection
+was losing to its own universe.
+
+## The regime gate: works exactly as designed, and the design is wrong (2026-08-19)
+
+`--apply-entry-vetoes --veto-ranging-stock` against EQUAL_WEIGHT:
+
+```
+trades          6,082 -> 1,033   (83% removed)
+pooled excess   +1.27% -> -2.44%
+clustered t      +1.57 -> -2.69      (significantly NEGATIVE)
+deflated Sharpe   0.766 -> 0.000
+ALPHA VERDICT: RAW EDGE IS BETA, NOT ALPHA
+```
+
+This is not "the gate didn't help". The gate made the result **significantly
+negative** — the one outcome nobody predicted.
+
+### What it actually did, split by what the basket did
+
+| basket move | ungated | gated | change |
+|---|---|---|---|
+| strong up (> +15%) | +6.57% | **−6.22%** | **−12.80** |
+| mild up (0..+15%) | −1.40% | −3.76% | −2.37 |
+| down (< 0%) | −2.02% | **+1.23%** | **+3.25** |
+
+**The gate does what it was built to do.** In falling markets it turns −2.02%
+into +1.23% — a genuine improvement, and the first thing in this whole audit
+that has helped the down-market case at all.
+
+And it is catastrophic anyway, because it removes the up markets, which is
+where every rupiah was. Fold 10 (basket +38.3%): excess goes from **+19.21% to
+−7.22%**. Fold 9 (+19.8%): +4.40% to −5.67%. Fold 11 (+28.4%): +1.68% to
+−7.06%.
+
+The mechanism is not mysterious. A ranging/choppy veto keeps you out of
+consolidation, and large moves begin in consolidation. The filter is
+structurally positioned to miss exactly the breakouts that pay.
+
+### The real trade-off this exposes
+
+There is a working down-market filter here (+3.25 points) attached to an
+up-market disaster (−12.80). Applying it only in falling markets would beat
+both arms. That requires knowing the regime in advance, which is the problem
+this system has never solved and which this run does not solve either.
+
+Note also that `--veto-ranging-stock` keys off each TICKER's own ADX, not the
+market's. It is not a market-regime timer, and it should not be read as a test
+of one.
+
+### The control run is still missing
+
+`--apply-entry-vetoes` alone (no `--veto-ranging-stock`) has not been run, so
+the damage cannot be attributed between the general entry vetoes and the
+ranging veto specifically. Both hypotheses fit these numbers.
+
+### Data caveat on this run
+
+The warehouse re-downloaded 614 of 615 tickers mid-sequence ("1/615 already
+covered ... history too short for 5y: 183, stale tail: 431"), minutes after a
+run that reported "615/615 already covered, fetching 0". The fold boundaries
+came out identical and the benchmark moved only +164.6% -> +165.6%, so the
+comparison stands — an effect of that size cannot manufacture a 3.7-point swing
+in pooled excess. But `f_mom_ew.json` and `f_mom_ew_gated.json` were computed
+on slightly different data, and consecutive runs on the same day are not
+reproducing.
+
+LEADING HYPOTHESIS, and it is probably benign: the cache-hit paths require the
+recorded fetch-ATTEMPT date to equal today. If the session crossed local
+midnight between the two runs, every marker went stale simultaneously and a
+full re-download is EXPECTED once per day, not a defect. `diagnose_warehouse
+_churn.py` settles it — if the stale attempt dates are yesterday's, that is the
+answer; if they are from earlier the same day, the marker is being lost and
+that is a real bug.
+
+## THE ENTRY VETOES ARE THE PROBLEM (2026-08-21) — and the live bot runs them
+
+The control run finally attributes the damage. Three arms, same strategy, same
+benchmark, fixed-baseline column:
+
+| arm | trades | excess/trade | clustered t | verdict |
+|---|---|---|---|---|
+| no vetoes | 5,241 | **+1.71%** | +1.92 | weak, not significant |
+| `--apply-entry-vetoes` | 962 | **−2.52%** | **−3.10** | BETA, NOT ALPHA |
+| + `--veto-ranging-stock` | 850 | **−2.31%** | **−2.69** | BETA, NOT ALPHA |
+
+**It is not the ranging veto.** Adding `--veto-ranging-stock` on top of the
+general vetoes changes excess from −2.52% to −2.31% — marginally BETTER, well
+inside noise. Essentially all the damage is done by `--apply-entry-vetoes`
+alone.
+
+That flag is documented in this repo as "same as the live bot": the RSI /
+parabolic / OBV / thin-volume / bear-regime filters. **They are running in
+production right now.**
+
+### What they cost
+
+They remove 82% of trades (5,241 -> 962) and turn a weak-positive excess into a
+**significantly negative** one. clustered t −3.10 is not "no edge" — it is
+evidence the filters select worse-than-random entries from within the signal's
+own candidate set.
+
+The mechanism is visible in the folds. In the three strongest quarters the
+vetoed arm gives up almost everything:
+
+```
+fold   basket%   no-vetoes excess   vetoed excess
+   6    +19.5          +2.12            -4.81
+   9    +19.8          +4.40            -4.01
+  10    +40.3         +19.21            -7.48
+  11    +27.4          +1.68            -4.51
+```
+
+These are momentum-style filters applied to a momentum signal. RSI-overbought
+and parabolic vetoes fire precisely on the strongest names in the strongest
+quarters — the ones that were paying. The filters are not removing risk, they
+are removing the right tail.
+
+### This closes the loop on the original complaint
+
+The paper account shows alpha **−0.83%**, trailing IHSG over 35 closed trades.
+The live bot applies these vetoes. The walk-forward now says that
+configuration produces −2.52%/trade excess at clustered t −3.10.
+
+The paper result and the backtest are no longer in tension. They agree, and
+they agree on a negative number.
+
+### The single highest-value change available
+
+Turn the entry vetoes off. That alone moves the measured excess from −2.52% to
++1.71%: not a proven edge (clustered t 1.92, deflated Sharpe 0.766, still
+concentrated in one quarter) but no longer a measured LOSS.
+
+That is the largest effect found anywhere in this audit, and it costs nothing
+to implement.
+
+### Caveat, stated plainly
+
+The vetoes run used a warehouse refreshed on 2026-08-21 while the no-veto run
+used 2026-08-20 data — fold boundaries shifted by ~2 days and `compare_folds.py`
+correctly refused to correlate them. The pooled comparison above survives that
+(a 2-day boundary shift cannot manufacture a 4.2-point swing at clustered t
+−3.10), but the per-fold correlations have not been computed. Re-running the
+no-veto arm on today's warehouse would close it properly.
+
+## Leave-one-out: no single veto is responsible (2026-08-21)
+
+Five runs, each disabling exactly one veto, fixed-baseline arm vs EQUAL_WEIGHT:
+
+| veto removed | excess | recovers | % of the gap | clustered t | trades | +trades |
+|---|---|---|---|---|---|---|
+| obv | −2.26% | **+0.26** | 6.1% | −2.73 | 991 | +29 |
+| thin_volume | −2.36% | +0.16 | 3.8% | −2.92 | 1,006 | +44 |
+| rsi | −2.52% | **+0.00** | 0.0% | −3.05 | 993 | +31 |
+| bear | −2.54% | −0.02 | −0.5% | −3.06 | 1,044 | +82 |
+| parabolic | −3.03% | **−0.51** | −12.1% | −3.68 | 1,024 | +62 |
+
+Reference points: all five ON = −2.52% (n 962); all five OFF = +1.71% (n 5,241).
+**The gap to explain is 4.23 points and 4,279 trades.**
+
+### The finding
+
+Removing all five at once recovers **+4.23 points**. Removing them one at a
+time recovers **−0.11 points in total** — nothing.
+
+Each single removal restores only **29 to 82 trades out of the 4,279 missing**.
+The five filters are almost completely REDUNDANT: they fire on the same
+candidates, so the intersection barely moves when one arm of the AND is
+dropped. Leave-one-out cannot attribute a conjunction, and this one is a
+conjunction.
+
+That reframes the earlier conclusion. "The entry vetoes cost 4.2 points" stands
+and is unchanged. "Therefore find and fix the bad veto" does not — there is no
+bad veto to find. The cost is a property of applying five overlapping filters
+together, not of any one of them.
+
+### My prediction, and how it was wrong
+
+Recorded before the runs: *"parabolic and rsi are the most damaging — both
+fire on the strongest names in the strongest quarters."*
+
+  * **rsi: exactly 0.00 effect.** Removing it changes nothing measurable.
+  * **parabolic is the only veto that HELPS.** Removing it makes the result
+    WORSE by 0.51 points and drives clustered t from −3.10 to −3.68. It is the
+    single most useful filter of the five, and I named it as the prime suspect.
+
+The reasoning ("momentum filters applied to a momentum signal remove the right
+tail") is still the best available explanation for why the GROUP is harmful. It
+simply does not decompose the way I assumed.
+
+### The measurement leave-one-out cannot make, and what replaces it
+
+To price each veto individually the design has to be **leave-one-IN**: enable
+exactly one and disable the other four. Leave-one-out measures a veto's
+*marginal* contribution given the other four are still running, which for
+overlapping filters isnear zero by construction. Leave-one-in measures the
+filter's own cost.
+
+The comparison between the two is itself the answer on redundancy: if the five
+leave-one-in costs sum to roughly 4.23 points the filters are independent; if
+each is large but they do not sum, they overlap.
+
+The `parabolic` run is the interesting one, because leave-one-in for parabolic
+is exactly the "keep only the veto that helps" configuration.
+
+### Data caveat
+
+The `rsi` run used a benchmark with 1,208 bars ending 2026-08-21; the other
+four used 1,207 bars ending 2026-08-20. That the rsi arm landed on −2.52%, the
+same figure as the all-vetoes arm to two decimals, is coincidence rather than
+identity — the two runs have different trade counts (993 vs 962). Worth
+re-running rsi on a matched warehouse before quoting "exactly zero".
+
+## Leave-one-IN closes it: every veto is harmful alone (2026-08-22)
+
+Each veto enabled by itself, the other four off. Fixed-baseline arm, vs
+EQUAL_WEIGHT:
+
+| configuration | excess | clustered t | trades | kept | vs no-veto |
+|---|---|---|---|---|---|
+| **NO vetoes** | **+1.71%** | **+1.92** | 5,241 | 100% | — |
+| only bear | −0.50% | −0.31 | 1,197 | 23% | −2.21 |
+| only obv | −0.80% | −0.52 | 1,243 | 24% | −2.51 |
+| only thin_volume | −1.25% | −0.82 | 1,241 | 24% | −2.96 |
+| only rsi | −2.10% | −1.75 | 1,206 | 23% | −3.81 |
+| only parabolic | −2.30% | −2.98 | 1,147 | 22% | −4.01 |
+| ALL five | −2.52% | −3.10 | 962 | 18% | −4.23 |
+
+**Monotone. Every configuration containing a veto is worse than none, and more
+vetoes is worse than fewer.** There is no subset worth keeping. The mildest
+single filter (bear) still costs 2.21 points.
+
+### The redundancy, measured
+
+**One veto alone already removes 76-78% of trades. All five remove 82%.**
+
+The first filter does essentially all the blocking; the other four add four
+percentage points. And the individual costs sum to 15.50 points while the five
+together cost 4.23 — strongly sub-additive, which is what heavy overlap looks
+like. These are close to the same filter wearing five different names.
+
+That is why leave-one-out found nothing: with four near-identical filters still
+running, removing the fifth cannot change the intersection.
+
+### Correcting what I said yesterday
+
+I wrote that `parabolic` was "the only veto that HELPS". Leave-one-in refutes
+it as a general claim: **parabolic alone is the WORST single veto** (−2.30%,
+clustered t −2.98).
+
+Both measurements are correct and they answer different questions. Adding
+parabolic to the other four does improve that combination (−3.03% -> −2.52%) —
+a true marginal statement. It is not evidence that parabolic is a good filter,
+and I presented it as though it were. Since the recommendation is to run no
+vetoes at all, the conditional it holds under never applies.
+
+### What the vetoes actually destroy
+
+Per-fold excess split by market direction (`compare_folds.py`):
+
+| arm | up folds | down folds |
+|---|---|---|
+| **no vetoes** | **+3.97%** | −2.26% |
+| only bear | −0.64% | −0.85% |
+| only obv | −0.79% | −1.12% |
+| only rsi | −2.02% | −1.85% |
+| only parabolic | −3.52% | −0.91% |
+
+The unfiltered arm earns everything it earns in RISING folds. Every veto arm is
+negative there. The filters are not trimming risk — they are removing the
+up-market participation that was the entire result.
+
+Parabolic is the extreme case: worst in up folds (−3.52%) and its per-fold
+excess correlates **−0.085** with the unfiltered arm, versus +0.71 to +0.81 for
+the others. It does not merely take fewer trades, it takes a different and
+unrelated set.
+
+### The recommendation, now unambiguous
+
+**Turn all entry vetoes off.** Not a subset, not a tuned threshold — all of
+them. That is +4.23 points of measured excess and it is the largest effect
+found anywhere in this audit.
+
+It does not create a proven edge: the no-veto arm is +1.71% at clustered t
+1.92, deflated Sharpe 0.766, still concentrated in one quarter. It removes a
+measured, significant LOSS.
+
+For the live bot that means `apply_entry_vetoes` off. The paper account's
+alpha of −0.83% against IHSG is the same finding measured forward.
+
+## The holding sweep measured one quarter, not the parameter (2026-08-22)
+
+Five walk-forwards, vs EQUAL_WEIGHT, fixed-baseline arm:
+
+| hold | trades | excess | **ex-best fold** | clustered t | defl. Sharpe | folds<0 |
+|---|---:|---:|---:|---:|---:|---:|
+| 20 | 8,317 | −0.05% | **−0.84%** | −0.14 | 0.075 | 12/14 |
+| 30 | 6,748 | +0.74% | **−0.63%** | +1.30 | 0.552 | 9/14 |
+| 45 | 5,773 | +1.50% | **+0.22%** | +1.95 | 0.776 | 7/14 |
+| 60 | 5,260 | +1.58% | **−0.11%** | +1.80 | 0.718 | 8/14 |
+| 90 | 5,038 | +2.08% | **−0.06%** | +2.03 | 0.788 | 8/14 |
+
+### My prediction was wrong, again in the opposite direction
+
+Recorded before the run: *"the peak is shorter than 60 days, likely 20–30, and
+the shape is a broad hump."* Both halves wrong. The headline column rises
+monotonically to the edge of the range, and 20 days is the WORST setting
+tested — negative, with 12 of 14 folds below zero.
+
+### What the ex-best-fold column shows
+
+Remove the single biggest-contributing fold and **every holding period
+collapses to zero or below**. The headline ramp is not the strategy improving
+with time; it is fold 10 growing:
+
+```
+fold 10 excess:   20d +5.75%   30d +8.82%   45d +12.61%   60d +16.70%   90d +22.40%
+fold 13 excess:   20d -3.12%   30d -7.51%   45d  -9.47%   60d -10.11%   90d -11.07%
+```
+
+Holding longer captures more of the one quarter that worked and more of the
+quarter that did not. It is a leverage knob on concentration, not a parameter
+with an optimum.
+
+### Two reasons not to chase 90 days
+
+**Overlap.** Position-days go from 166k at 20d to 453k at 90d — 2.7x the
+exposure from 40% FEWER trades. At 90 days against ~63-day test windows, most
+of each trade's return accrues outside the window it was entered in, and
+adjacent trades overlap heavily. The clustered t clusters by ENTRY DATE, not by
+overlapping holding windows, so it does not correct for this. The +2.03 at 90d
+is inflated relative to the +1.95 at 45d.
+
+**The current regime.** Fold 13 — the most recent quarter, and the one the
+original complaint came from — gets monotonically worse as holding lengthens,
+from −3.12% at 20d to −11.07% at 90d. The setting that looks best on the pooled
+number is the worst for the conditions actually being traded.
+
+### The recommendation: leave it at 60
+
+45 and 60 are indistinguishable (+1.50 vs +1.58, clustered t 1.95 vs 1.80), and
+45 is the only setting whose ex-best-fold figure is positive at all (+0.22%,
+which is not a result either). There is no case for changing the parameter and
+no case for extending the sweep past 90 — the gain is one quarter and the
+overlap inflation grows with it.
+
+**The sweep did not find a better holding period. It found another way of
+looking at the concentration that was already the headline problem.**
+
+## The live bot has never run a configuration anyone measured (2026-08-23)
+
+Adding a measured-expectation block to the daily run surfaced something no
+walk-forward could, because it is not a property of the strategy — it is a
+property of the gap between the strategy that was measured and the one that
+runs.
+
+`runner_config.json`, as it stands:
+
+```json
+{
+  "daily_capital_idr": 4748425.0,
+  "max_positions": 15,
+  ...
+}
+```
+
+No `exit_profile`. No `disabled_entry_vetoes`. That resolves to:
+
+| | live bot | every fold table on disk |
+|---|---|---|
+| exit profile | `legacy` — stop/target/trailing ACTIVE | `forward_test` — no price exits |
+| holding_max_days | 20 | 60 |
+| entry vetoes | all five ON | varies by arm, mostly OFF |
+
+Every number in this document — +1.71%/trade and clustered t 1.92 on the
+fixed-baseline arm, −0.44% ex-fold-10 on the walk-forward-chosen arm, the veto
+leave-one-in table, the holding sweep — describes the right-hand column. The bot the user runs, and whose results prompted the
+original complaint, is the left-hand column. Nothing in this project has ever
+measured it.
+
+That is not a small discrepancy between neighbouring settings:
+
+* the exit ladder was measured at roughly **−1.6 points per trade** and removed
+  from the validated profile for that reason; the live bot still runs it,
+* the five entry vetoes together were measured at **−2.52%/trade** against
+  **+1.71%** with none of them; the live bot runs all five,
+* `holding_max_days` 20 was the worst row of the holding sweep (−0.05%/trade
+  headline, −0.84% ex-best fold); the live bot runs 20.
+
+Each of the three live settings is, independently, the measured-worst option
+available. The daily screen said none of this. It printed nine feature ticks
+and a top pick.
+
+### What the block does about it
+
+It refuses to attach a measurement to a configuration that measurement was not
+taken from, and names the differences instead. As shipped, the live run now
+prints `NOT APPLICABLE` with the three-row table above rather than a number.
+That is the honest output, and it is also the actionable one: the fix is to
+make the two columns agree, in either direction.
+
+### This does not vindicate the strategy
+
+Aligning the config is not expected to produce a good result — the aligned
+measurement is +1.71%/trade at clustered t 1.92 and deflated Sharpe 0.766,
+below both bars, with the chosen arm at +1.27% falling to −0.44% without one
+fold and 8 of 14 folds negative. The verdict
+line for the aligned configuration reads `EV positive but WEAK ... could be
+noise.`
+
+What alignment buys is that the forward test finally tests something that was
+measured. Today the paper account's −0.83% alpha over 35 closed trades cannot
+be compared to any backtest in this repository, because no backtest ran that
+configuration. Fixing that is worth more than another sweep.
+
+### The order to do it in
+
+1. Set `"exit_profile": "forward_test"` and
+   `"disabled_entry_vetoes": ["rsi","parabolic","obv","thin_volume","bear"]`.
+2. Run one daily scan and read the log. It should say `entry vetoes: ALL OFF`
+   and `exit profile: FORWARD_TEST`. Until this release nothing printed the
+   veto line at all, so this check was previously impossible to perform.
+3. Re-run the walk-forward with those exact settings and
+   `--save-folds results/expectation.json`. The block then reports the number
+   instead of withholding it.
+4. Let it run forward for several weeks. That is the one piece of evidence this
+   project has never had, and no further backtesting substitutes for it.
+
+**Twelve findings were about a failure that looked like normal operation. This
+one is about a system whose entire body of evidence describes a configuration
+it does not run.**
+
+## The recommendation had a hole in it, and the hole was the exit rule (2026-08-23)
+
+v77 told the user to set `"exit_profile": "forward_test"`. That switches off
+every price-based exit — no stop, no target, no trailing — leaving
+`holding_max_days` as the only rule that closes a position. It is the right
+recommendation and it rests entirely on that one rule working.
+
+It did not always work, and when it failed it failed silently.
+
+`papertrade._bars_held` located the entry bar by exact date equality and
+returned `None` on a miss; both callers wrote `if bars_held is not None and
+bars_held >= max_days` with no else. A position whose entry date is not a
+trading bar therefore never aged, never exited, and never appeared on any
+report. Under `legacy` the trailing stop would eventually catch it. Under
+`forward_test` nothing would. The profile this audit recommends is the profile
+where the bug becomes unbounded.
+
+Two verified routes create such a date:
+
+1. `manual_buy` accepts any date string with no trading-day validation.
+2. `daily_run` has no trading-day guard, and this project has no IDX exchange
+   calendar. On a market holiday the fill price is read from the last available
+   bar while `entry_date` is stamped `today_wib()` — the holiday. They are
+   different days by construction.
+
+Fixed in `bars_held_or_reason()`: an off-bar date counts from the next open
+(unambiguous — that is when the position started), while a pre-window date, a
+future date and an unparseable one each return a named reason that both call
+sites now print.
+
+### What this says about the audit's own method
+
+Thirteen of the fourteen findings were located by asking "what does this look
+like when it fails?" This one was located by asking it of a recommendation I
+had just made. The measured-expectation block in v77 asserted that live
+`holding_max_days` is 20; checking whether the live path even *uses* that
+value — rather than inferring it from a config default — is what surfaced the
+call site.
+
+A claim about the live system that has only been read off a config file is not
+a measurement. That is the same rule this document applies to returns.
+
+### Still not fixed, and deliberately
+
+`daily_run` still has no trading-day guard, and `manual_buy` still accepts any
+date. Both are live-behaviour changes: a trading-day guard would skip runs, and
+date validation would reject entries the user may have legitimate reasons to
+record. The defect they feed is closed at the point where it did damage. Adding
+an exchange calendar is a separate change with its own risk, and flipping live
+trading behaviour as a side effect of a bug fix is what this audit keeps
+finding in other people's code.
+
+### The user's current book is unaffected
+
+All 66 dated records in `paper_state.json` fall on weekdays, none on a known
+IDX holiday. This is latent, not realised. Saying otherwise would be the same
+overclaim the audit exists to catch.
+
+## The live/measured gap was four axes wide, not three (2026-08-23)
+
+The table in "The live bot has never run a configuration anyone measured" had
+three rows. It should have had four.
+
+| | live bot (as shipped) | every fold table on disk |
+|---|---|---|
+| exit profile | `legacy` — ladder ACTIVE | `forward_test` — no price exits |
+| holding_max_days | 20 | 60 |
+| **entry score cutoff** | **60** | **80** |
+| entry vetoes | all five ON | mostly OFF |
+
+The fourth row is worse than the other three, because the other three are
+silent while this one was actively contradicted on screen. `daily_run` logs
+`entry score >= {trade_cfg.backtest.score_entry_threshold}` off the resolved
+profile; `kala_daily_trader` decided with a hardcoded `Config()`. Set
+`exit_profile: forward_test` and the log would have read **80** on every run
+while the scanner bought from **60**.
+
+The +1.71%/trade measurement was taken at baseline 80 over 5,241 trades. Every
+entry scoring 60-79 is outside it.
+
+### What this run of the method has now produced
+
+Findings 13, 14 and 15 all came from the same move: take a claim this audit
+itself made about the live system, and check it against the code that decides
+rather than the config that describes.
+
+- **13** — the daily screen recommends without stating an expectation, and the
+  measurement it would state describes a configuration the bot does not run.
+  Found by asking what the live screen actually says.
+- **14** — the max-holding rule silently never fires for a position whose entry
+  date is not a trading bar. Found by checking whether the live path really
+  uses `holding_max_days`, rather than reading it off a default.
+- **15** — the entry cutoff the log prints is not the one the scanner applies.
+  Found by checking the same thing for `score_entry_threshold`.
+
+Two of the three were in code this audit had already read several times. What
+changed was the question: not "is this correct?" but "is the number this
+reports the number this uses?"
+
+### The recommendation, restated
+
+`runner_config.json`:
+
+```json
+"exit_profile": "forward_test",
+"disabled_entry_vetoes": ["rsi", "parabolic", "obv", "thin_volume", "bear"]
+```
+
+That single key now moves all three of exit ladder, holding period and entry
+cutoff to the measured configuration — which it always claimed to, and as of
+this release actually does. Expect **far fewer BUY signals**: the cutoff goes
+from 60 to 80, and at 80 the plain-BUY band is empty, so everything entered
+will be labelled STRONG BUY. That is not a bug and not a data outage; it is the
+threshold the measurement was taken at.
+
+## The tooling argued against the recommendation (2026-08-23)
+
+`preflight` exists to catch settings that silently do nothing. Run the
+configuration this audit recommends through it and it reports:
+
+```
+WARN  'disabled_entry_vetoes' is not read by any code. It is silently
+      ignored, so whatever you set it to is having no effect.
+```
+
+The setting is read by `entry_settings.entry_config_from`. The warning is
+false, and it is about the change worth +4.23 points per trade — the largest
+single effect anywhere in this study. Anyone who followed the instruction and
+then checked their work was told to undo it.
+
+`breaker_preserve_halt_when_unreadable` — a circuit-breaker safety option read
+in `daily_run` — was reported the same way.
+
+Both were missing from `KNOWN_CONFIG_KEYS`, whose only guard checked
+`daily_run.DEFAULT_CONFIG`. Neither key lives there.
+
+### The pattern is now explicit
+
+Findings 14, 15 and 16 came from one question asked three times: **is the
+number this reports the number this uses?**
+
+- 14 — the max-holding rule reported nothing and checked nothing, for any
+  position whose entry date was not a trading bar.
+- 15 — the daily log printed `entry score >= 80` while the scanner bought
+  from 60.
+- 16 — preflight reported a working setting as inert.
+
+Each was found by taking a claim this audit had made about the live system and
+checking it against the code that decides, rather than the config that
+describes. Two of the three were in files already read several times during
+this audit. What changed was the question.
+
+Worth stating because it generalises: in a system where the arithmetic is
+right, the defects concentrate at the boundary between what the code does and
+what the code says it does. Every one of the sixteen findings sits on that
+boundary.
+
+### What is left of the recommendation
+
+Nothing blocking. As of this release:
+
+* the entry-veto setting is read (v22), reported in the log (v77), and
+  recognised by preflight (this release),
+* `exit_profile` moves the exit ladder, the holding period **and** the entry
+  cutoff together (v79) rather than two of the three,
+* the only exit rule left under `forward_test` cannot silently fail to fire
+  (v78),
+* and the daily run states what the resulting configuration has been measured
+  to be worth, or that it has not been (v77).
+
+The remaining step needs elapsed time, not code.
+
+## The forward test was set up to flatter itself (2026-08-23)
+
+Every release since v77 has been clearing the way for one thing: run the
+measured configuration forward and compare the result to the measurement. That
+comparison had a systematic bias built into it.
+
+The paper trader books fills through `cfg.costs`, which was always the default
+`CostModel()` — `spread_mode="flat"`, a constant 0.10% half-spread at every
+price. Every validated number in this project was measured with `--tick-spread`
+(`tick_floor`), where the half-spread cannot be tighter than half an IDX tick.
+
+On this account's nine open positions:
+
+| | booked | measured | gap |
+|---|---:|---:|---:|
+| mean round trip | 0.64% | 0.87% | **0.23%** |
+| KBLI @ 323 | 0.64% | 1.05% | 0.42% |
+| BSML @ 519 | 0.64% | 1.39% | 0.76% |
+| a 67-rupiah name | 0.64% | 1.91% | 1.28% |
+
+Flat is never the dearer model, so this is not noise that averages out. It is
+**0.23 points per trade in one direction** — about 14% of the +1.71%/trade the
+forward test would be judged against, and more than half of the −0.44%
+ex-fold-10 figure.
+
+And `daily_run` already ran its **friction report** at `tick_floor`. The same
+run has been telling the user what their trading costs under the honest model
+and recording it at the optimistic one.
+
+### Why the default is still flat
+
+Because changing it rewrites a live book's arithmetic without being asked, and
+this audit exists partly to catch exactly that. `"costs_spread_mode":
+"tick_floor"` is the opt-in; the measurement records which model it charged;
+and the expectation block now refuses to quote a tick-floored figure at a
+flat-booked account rather than presenting a comparison that is 14% off.
+
+### The recommendation, final form
+
+```json
+{
+  "exit_profile": "forward_test",
+  "disabled_entry_vetoes": ["rsi", "parabolic", "obv", "thin_volume", "bear"],
+  "costs_spread_mode": "tick_floor"
+}
+```
+
+Three keys. The first moves the exit ladder, holding period and entry cutoff to
+the measured configuration; the second turns off the filters measured at
+−4.23 points; the third makes the book charge what the backtest charged.
+
+With all three set, the daily run will print the measured expectation instead
+of withholding it — which is the signal that the live system and the evidence
+finally describe the same thing.
+
+Expect fewer trades and worse-looking fills. Both are the point.
+
+### Seventeen findings, one boundary
+
+13, 14, 15, 16 and 17 were all found by asking whether a number this system
+reports is the number it uses. The last of them is about money rather than
+configuration, and it is the one that would have quietly corrupted the
+conclusion of the forward test rather than any individual trade.
+
+## Verifying the recommendation found a defect in the recommendation (2026-08-23)
+
+Before shipping the three-key configuration I ran it through the whole live
+path and checked every claim I had made about it:
+
+```
+preflight            OK  3 keys, all recognised
+entry cutoff         80          (was 60 before v79)
+holding_max_days     60          (was 20)
+spread_mode          tick_floor  (was flat)
+trailing enabled     False
+hard stop / target   inert by design
+log line             entry vetoes: ALL OFF — the measured-best setting
+```
+
+All of it held. What did not hold was the instruction the block prints when
+nothing has been measured yet. It was a fixed string with no `--tick-spread`,
+no `--holding-days`, no `--baseline-threshold` — so following it against the
+recommended configuration produces a table recording `spread_mode: flat`, and
+the same block then **refuses the table it asked for**.
+
+The command is now built from the live setup, and a test generates it, parses
+it with the REAL argument parser, constructs the provenance that run would
+save, and asserts the comparison comes back empty — for four configurations
+including this one.
+
+### Why this one needed a different kind of test
+
+The defect lived between two pieces of code that never met: a string in
+`expectation.py` and an `argparse` definition in `run_walkforward.py`. No unit
+test of either module can see it. `build_parser()` was extracted from `main`
+so the two could finally be put in the same room.
+
+Six mutations, each making the command describe a slightly different
+configuration from the one running. All caught.
+
+### Where the audit stands
+
+Eighteen findings. The last six all came from one question — *is the number
+this reports the number this uses?* — and the last of them came from asking it
+about my own instructions rather than about the system's.
+
+Nothing is now blocking the forward test. The three keys resolve to the
+measured configuration, the daily run states what that configuration has been
+measured to be worth, the command it prints produces a table it will accept,
+and the book charges what the backtest charged.
+
+What remains needs weeks of elapsed time and no further code.
+
+## The documents check out; the exemption did not (2026-08-23)
+
+Having found Finding 18 by running an instruction rather than reading it, the
+same treatment went to the documentation: `check_docs.py` compares quoted line
+counts, the test-file count, every code path named in backticks, and every
+documented `python foo.py --flag` command against the repository.
+
+**Result: nothing wrong.** 14 documents, 39 commands, no broken references, no
+stale counts. After nineteen findings it is worth recording a check that came
+back clean, because a report that only ever contains bad news stops being
+information.
+
+What it did surface was a command needing an exemption — `daily_run.py
+--capital`, which is read straight from `sys.argv` and so cannot appear in
+`--help`. That exemption turned out to be hiding a defect: `--captial`,
+`--capital=N` and `-capital` all ran at the stored capital with nothing in the
+log to say so. Small, on a money input, and the same shape as everything else.
+
+### Why a checker for prose was worth building
+
+Six line-count and test-count figures have been hand-synced in this session
+alone. The first full run of the new test failed on the summary it was written
+to guard, because adding the test file itself moved the count. That is the
+whole argument for the tool in one event.
+
+It refuses to check measured results, and says so in its own docstring:
++1.71%/trade needs a five-year warehouse and an hour of compute to re-derive,
+and a checker that silently skipped it would be worse than one that never
+claimed to.
+
+### Nineteen findings, and the shape of the last seven
+
+| | reported | used |
+|---|---|---|
+| 13 | a confident BUY | no expectation stated at all |
+| 14 | position aged, exit rule live | rule skipped for an off-bar entry |
+| 15 | `entry score >= 80` | bought from 60 |
+| 16 | "this setting has no effect" | it works, and it is the best change available |
+| 17 | friction at tick-floored spreads | fills booked 0.23 pts/trade cheaper |
+| 18 | "to measure it, run this" | the command's own output then refused |
+| 19 | `--capital 3000000` | ran at the stored 4,748,425 |
+
+Every one is a claim the system makes about itself that the system contradicts.
+None is an arithmetic error.
+
+### Still the only thing left
+
+Set the three keys, let it run for several weeks. Nothing in the code is
+blocking that now.

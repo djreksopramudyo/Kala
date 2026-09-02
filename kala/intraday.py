@@ -28,6 +28,8 @@ from __future__ import annotations
 
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from datetime import datetime, time
 from pathlib import Path
@@ -178,8 +180,11 @@ class AlertDedup:
         self._seen: dict = {}
         if self.path.exists():
             try:
-                self._seen = json.loads(self.path.read_text())
-            except Exception:
+                self._seen = json.loads(self.path.read_text(encoding="utf-8"))
+            except Exception as e:  # noqa: BLE001 - reported, not swallowed
+                print(f"WARNING: alert dedup state at {self.path} unreadable "
+                      f"({e}); starting empty, so alerts already sent today may "
+                      f"repeat once.", file=sys.stderr)
                 self._seen = {}
 
     def filter_new(self, alerts: list[dict], today: str) -> list[dict]:
@@ -195,8 +200,18 @@ class AlertDedup:
         return fresh
 
     def save(self):
+        """Atomic write; a failure is reported, not swallowed.
+
+        Minor by comparison with the other state files -- losing this causes
+        duplicate alerts, not lost data, and duplicate alerts are self-evident.
+        It is fixed for consistency: the same tmp-then-replace every other
+        store now uses, and a failure that says so rather than producing
+        unexplained daily repeats."""
         try:
-            self.path.parent.mkdir(exist_ok=True)
-            self.path.write_text(json.dumps(self._seen))
-        except Exception:
-            pass
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = self.path.with_name(self.path.name + ".tmp")
+            tmp.write_text(json.dumps(self._seen), encoding="utf-8")
+            os.replace(tmp, self.path)
+        except Exception as e:  # noqa: BLE001 - reported, not swallowed
+            print(f"WARNING: alert dedup state not saved ({e}); today's alerts "
+                  f"may repeat on the next run.", file=sys.stderr)

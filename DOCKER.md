@@ -37,8 +37,24 @@ KALA_TELEGRAM_TOKEN=your-bot-token
 KALA_TELEGRAM_CHAT_ID=your-chat-id
 EOF
 
-# bring your existing state along, or start clean
-touch paper_state.json runner_config.json   # if starting clean, or copy in existing ones
+# Bring your existing state along, or start clean.
+#
+# Do NOT use `touch` here. All three files are read with json.loads, and a
+# zero-byte file is not valid JSON -- `touch` produces a container that dies
+# with JSONDecodeError on its first run. They are also bind-mounted, so each
+# must exist on the host before `up`, or Docker creates a DIRECTORY in its
+# place and every write fails.
+
+# paper_state.json needs a real skeleton (cash, start_capital, positions,
+# pending), not `{}` -- PaperTrader.load raises KeyError on an empty object.
+# reset_paper.py writes exactly that skeleton and backs up any existing file:
+python reset_paper.py --capital 10000000 --sync-config --yes
+
+# These two are merged over defaults / start legitimately empty, so `{}` is
+# the correct seed. Existing files are left alone.
+for f in runner_config.json watchlist.json; do
+  [ -s "$f" ] || echo '{}' > "$f"
+done
 mkdir -p results
 
 docker compose up -d --build

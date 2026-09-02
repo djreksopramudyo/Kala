@@ -3,6 +3,7 @@
   "start_capital_idr": 0.0,
   "risk_pct_per_trade": 2.0,
   "max_positions": 10,
+  "exit_profile": "legacy",
   "telegram_token": "SET_VIA_KALA_TELEGRAM_TOKEN_ENV_VAR_INSTEAD",
   "telegram_chat_id": "SET_VIA_KALA_TELEGRAM_CHAT_ID_ENV_VAR_INSTEAD",
   "watchlist_min_discount_pct": 15.0,

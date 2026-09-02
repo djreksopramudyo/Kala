@@ -66,6 +66,11 @@ class BreakerConfig:
     enabled: bool = False
     halt_drawdown_pct: float = 15.0
     resume_drawdown_pct: float = 10.0
+    # What to do when the sidecar exists but will not parse. False keeps the
+    # long-standing behaviour (re-anchor, do not halt); True fails closed.
+    # See load_breaker_state for the trade-off. Either way the loss is
+    # reported — that part is not optional.
+    preserve_halt_when_unreadable: bool = False
 
 
 @dataclass(frozen=True)
@@ -81,6 +86,7 @@ class BreakerState:
 def evaluate_breaker(equity: float, net_contributions: float = 0.0,
                      stored_peak: float | None = None,
                      was_halted: bool = False,
+                     state_lost: bool = False,
                      cfg: BreakerConfig | None = None) -> BreakerState:
     """Decide whether new buys are allowed.
 
@@ -88,6 +94,15 @@ def evaluate_breaker(equity: float, net_contributions: float = 0.0,
     ``net_contributions``  cumulative deposits MINUS withdrawals to date
     ``stored_peak``        previous high-water mark, None on first run
     ``was_halted``         whether the breaker was already tripped (hysteresis)
+    ``state_lost``         the sidecar existed but could not be read, so BOTH
+                           the peak and the halt flag are gone
+
+    ``state_lost`` needs its own argument because carrying ``was_halted=True``
+    alone does nothing: with ``stored_peak=None`` the high-water mark
+    re-anchors to today's equity, drawdown computes as 0.0%, and the
+    hysteresis branch immediately reports RESUMED. The halt is not
+    recoverable from the flag — the measurement it was made against is what
+    was lost.
 
     The peak only ever ratchets UP. Letting it fall with equity would move the
     goalposts down in exactly the market where the breaker is supposed to
@@ -135,6 +150,22 @@ def evaluate_breaker(equity: float, net_contributions: float = 0.0,
                                    "cannot measure drawdown; NOT halting (fails "
                                    "open by design).")
 
+    if state_lost and cfg.preserve_halt_when_unreadable:
+        # Opt-in, and it must halt on its own authority rather than through
+        # `drawdown`: the number drawdown would be measured against is exactly
+        # what went missing. Reported as its own state so nobody reads it as a
+        # real drawdown signal.
+        return BreakerState(adjusted_equity=adjusted, peak=peak,
+                            drawdown_pct=drawdown, halted=True, changed=True,
+                            reason=misconfig + (
+                                "HALTED — breaker state unreadable. The peak "
+                                "and the halt flag were both lost, so drawdown "
+                                f"({drawdown:.1f}%) is measured against a peak "
+                                "re-anchored to TODAY and means nothing yet. "
+                                "New buys are stopped until the sidecar is "
+                                "readable again; delete it to re-anchor "
+                                "deliberately."))
+
     # First run with the breaker on: the high-water mark anchors to TODAY. If
     # the account is already underwater, "drawdown 0.0%" is a statement about
     # the peak this file has SEEN, not about the account's history — say so,
@@ -180,18 +211,63 @@ def evaluate_breaker(equity: float, net_contributions: float = 0.0,
 # paper_state.json. That state file holds the entire trading history and undo
 # stacks and is written atomically for a reason; adding a field to it to
 # support an optional safety feature is risk this feature does not need. If
-# this sidecar is lost or corrupt, the breaker simply re-anchors its peak to
-# today's equity — no false halt, no crash.
+# this sidecar is lost or corrupt, the breaker re-anchors its peak to today's
+# equity — no false halt, no crash.
+#
+# That sentence stood alone for a long time and it only weighs one direction.
+# The cost it does not name: re-anchoring to TODAY's equity computes a 0%
+# drawdown, which means an account that was halted resumes buying without
+# satisfying resume_drawdown_pct — a MISSED halt, arriving precisely when the
+# halt was doing its job. Both directions are now stated, the case is
+# reported rather than silent, and preserve_halt_when_unreadable lets an
+# operator pick the other side.
+
+@dataclass(frozen=True)
+class BreakerLoad:
+    """What the sidecar said, and whether it managed to say anything.
+
+    ``load_breaker_state`` used to answer ``(None, False)`` for BOTH a file
+    that does not exist yet and a file that exists but will not parse. Those
+    are not the same event. The first is a genuine first run. The second means
+    a halt state EXISTED and was lost, and answering ``was_halted=False``
+    re-anchors the peak to today's (drawn-down) equity, computes a 0%
+    drawdown, skips the halt branch entirely, and prints "First run:
+    high-water mark anchored to today's equity" — a sentence that is false.
+    A halted account silently resumes buying, at the exact moment the halt was
+    protecting it, and the hysteresis in ``resume_drawdown_pct`` is skipped
+    rather than satisfied.
+    """
+    peak: float | None = None
+    halted: bool = False
+    existed: bool = False        # a file was there
+    error: str | None = None     # it was there and could not be read
+
+
+def read_breaker_state(path: str | Path) -> BreakerLoad:
+    """Load the sidecar, keeping "absent" and "damaged" apart."""
+    p = Path(path)
+    if not p.exists():
+        return BreakerLoad()
+    try:
+        raw = json.loads(p.read_text(encoding="utf-8"))
+        peak = raw.get("peak")
+        return BreakerLoad(peak=float(peak) if peak is not None else None,
+                           halted=bool(raw.get("halted", False)), existed=True)
+    except (json.JSONDecodeError, ValueError, TypeError, OSError) as e:
+        return BreakerLoad(existed=True, error=f"{type(e).__name__}: {e}")
+
 
 def load_breaker_state(path: str | Path) -> tuple[float | None, bool]:
-    """Return ``(stored_peak, was_halted)``; ``(None, False)`` if unreadable."""
-    try:
-        raw = json.loads(Path(path).read_text())
-        peak = raw.get("peak")
-        return (float(peak) if peak is not None else None,
-                bool(raw.get("halted", False)))
-    except (FileNotFoundError, json.JSONDecodeError, ValueError, TypeError, OSError):
-        return None, False
+    """Return ``(stored_peak, was_halted)``; ``(None, False)`` if unreadable.
+
+    Signature and behaviour deliberately unchanged. The lenient answer for a
+    damaged sidecar was a documented choice ("no false halt, no crash") and is
+    not overruled here. It is simply no longer the ONLY thing a caller can
+    learn: ``read_breaker_state`` reports whether the file was absent or
+    damaged, and ``evaluate_breaker(state_lost=...)`` acts on the difference.
+    """
+    load = read_breaker_state(path)
+    return load.peak, load.halted
 
 
 def save_breaker_state(path: str | Path, state: BreakerState) -> None:
@@ -204,7 +280,7 @@ def save_breaker_state(path: str | Path, state: BreakerState) -> None:
         "halted": state.halted,
         "drawdown_pct": state.drawdown_pct,
         "adjusted_equity": state.adjusted_equity,
-    }, indent=2))
+    }, indent=2), encoding="utf-8")
     tmp.replace(p)
 
 

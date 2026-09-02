@@ -15,7 +15,7 @@ from pathlib import Path
 
 from kala.notify import send_telegram
 
-cfg = json.loads(Path("runner_config.json").read_text())
+cfg = json.loads(Path("runner_config.json").read_text(encoding="utf-8"))
 ok = send_telegram(
     cfg.get("telegram_token", ""),
     cfg.get("telegram_chat_id", ""),

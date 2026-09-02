@@ -20,6 +20,14 @@ services:
     volumes:
       - ./paper_state.json:/app/paper_state.json
       - ./runner_config.json:/app/runner_config.json
+      # watchlist.json is written INSIDE the container by the weekly Saturday
+      # fundamental screen. Without this mount it lives only in the container
+      # layer, so every `up --build` silently discards the researched fair
+      # values and theses -- and the dip-alert step then reports zero alerts,
+      # which is indistinguishable from a quiet week. It must exist on the
+      # host before `up` or Docker creates a directory in its place; DOCKER.md
+      # seeds it with `{}`.
+      - ./watchlist.json:/app/watchlist.json
       - ./results:/app/results
     command: ["python", "telegram_bot.py"]
 
@@ -35,6 +43,14 @@ services:
     volumes:
       - ./paper_state.json:/app/paper_state.json
       - ./runner_config.json:/app/runner_config.json
+      # watchlist.json is written INSIDE the container by the weekly Saturday
+      # fundamental screen. Without this mount it lives only in the container
+      # layer, so every `up --build` silently discards the researched fair
+      # values and theses -- and the dip-alert step then reports zero alerts,
+      # which is indistinguishable from a quiet week. It must exist on the
+      # host before `up` or Docker creates a directory in its place; DOCKER.md
+      # seeds it with `{}`.
+      - ./watchlist.json:/app/watchlist.json
       - ./results:/app/results
     entrypoint: ["sh", "-c"]
     command:

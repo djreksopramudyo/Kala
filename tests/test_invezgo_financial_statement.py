@@ -24,12 +24,12 @@ Q_FIXTURE = FIXT / "invezgo_financial_statement_bbca_is_q.json"
 
 @pytest.fixture
 def fy_response():
-    return json.loads(FY_FIXTURE.read_text())
+    return json.loads(FY_FIXTURE.read_text(encoding="utf-8"))
 
 
 @pytest.fixture
 def q_response():
-    return json.loads(Q_FIXTURE.read_text())
+    return json.loads(Q_FIXTURE.read_text(encoding="utf-8"))
 
 
 # ---------------- normalize_financial_statement (real fixtures) --------------

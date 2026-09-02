@@ -330,14 +330,58 @@ def test_walk_forward_alpha_check_zero_when_pure_beta():
     assert "BETA, NOT ALPHA" in text
 
 
-def test_walk_forward_no_alpha_section_without_benchmark():
-    """The alpha check is additive and opt-in: no benchmark supplied ->
-    no ALPHA section at all, and existing raw-return fields are untouched."""
+def test_a_missing_benchmark_says_so_instead_of_dropping_the_section():
+    """A skipped alpha check must be VISIBLE, not merely absent.
+
+    This test previously asserted the opposite — `"ALPHA" not in text` — on the
+    reasoning that the alpha check was additive and opt-in. That was true when
+    it was new. It is not true now: the alpha check is the measurement that
+    overturned the exit-ladder result, and every conclusion drawn from this
+    harness rests on it.
+
+    The failure it was locking in: `--benchmark` accepts any string, and an
+    unresolvable ticker leaves the run printing its warning on stderr and a
+    report on stdout whose only difference is a MISSING section. Redirect
+    stdout to a log file and the warning is gone; what is saved reads as a
+    clean confirmed edge. Reproduced in repro/repro_missing_benchmark.py.
+
+    The raw verdict is still printed — it is a real measurement — but it is
+    labelled raw, and the reason the alpha check is absent travels with it.
+    """
     dfs = _universe(k=2, n=400)
     report = walk_forward(dfs, train_bars=200, test_bars=60, warmup_bars=60,
                           thresholds=(45.0,), min_train_trades=5)
     assert report.pooled_excess_baseline.get("n", 0) == 0
-    assert "ALPHA" not in report.summary_text()
+
+    text = report.summary_text()
+    assert "ALPHA CHECK: NOT RUN" in text
+    assert "--benchmark" in text, "the report must name the usual cause"
+    # The raw verdict survives, but it may not pass itself off as the alpha one.
+    assert "VERDICT (raw, vs cash)" in text
+    assert "ALPHA VERDICT" not in text
+    # And it must not claim an alpha result it never computed.
+    assert "BETA, NOT ALPHA" not in text
+
+
+def test_a_present_benchmark_does_not_print_the_skip_notice():
+    """Non-vacuity: the notice must be absent when the check DID run.
+
+    Without this, printing "ALPHA CHECK: NOT RUN" unconditionally would satisfy
+    the test above.
+    """
+    n = 400
+    dfs = _universe(k=3, n=n)
+    idx = list(dfs.values())[0].index
+    rng = np.random.default_rng(11)
+    bench = pd.DataFrame(
+        {"Close": 1000 * np.exp(np.cumsum(rng.normal(0.0005, 0.010, len(idx))))},
+        index=idx)
+    report = walk_forward(dfs, benchmark=bench, train_bars=200, test_bars=60,
+                          warmup_bars=60, thresholds=(45.0,), min_train_trades=5)
+    assert report.pooled_excess_baseline.get("n", 0) > 0
+    text = report.summary_text()
+    assert "ALPHA CHECK: NOT RUN" not in text
+    assert "ALPHA VERDICT" in text
 
 
 def test_walk_forward_oos_trades_only_from_test_windows():

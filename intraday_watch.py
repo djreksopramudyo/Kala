@@ -21,6 +21,7 @@ It never touches paper_state.json — daily_run.py owns all trading decisions.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from datetime import datetime
@@ -78,13 +79,13 @@ def maybe_pulse(cfg, positions, quotes, now) -> str | None:
     if every <= 0 or not positions:
         return None
     try:
-        last = datetime.fromisoformat(PULSE_PATH.read_text().strip())
+        last = datetime.fromisoformat(PULSE_PATH.read_text(encoding="utf-8").strip())
         if (now - last).total_seconds() < every * 60:
             return None
     except Exception:
         pass  # no pulse yet today -> send one
     PULSE_PATH.parent.mkdir(exist_ok=True)
-    PULSE_PATH.write_text(now.isoformat())
+    PULSE_PATH.write_text(now.isoformat(), encoding="utf-8")
 
     lines = [f"⏱ Kala intraday {now.strftime('%H:%M')} WIB (quotes delayed ~15m)"]
     for t, p in positions.items():
@@ -96,17 +97,36 @@ def maybe_pulse(cfg, positions, quotes, now) -> str | None:
     return "\n".join(lines)
 
 
+def parse_args(argv=None):
+    """The command line, parsed before any work.
+
+    This was ``force = "--force" in sys.argv``, which is the same defect as the
+    old ``--capital`` check in daily_run.py: ``--forse`` was accepted, ignored,
+    and — because a closed market exits silently — produced no output at all, so
+    a mistyped test run looked exactly like a successful one. ``--help`` had the
+    same fate: swallowed, exit 0, nothing printed.
+    """
+    ap = argparse.ArgumentParser(
+        prog="intraday_watch.py",
+        description="Read-only intraday alert pass. Called every 15 minutes by "
+                    "the scheduler; exits silently when IDX is closed.")
+    ap.add_argument("--force", action="store_true",
+                    help="run even when IDX is closed (for testing)")
+    return ap.parse_args(sys.argv[1:] if argv is None else argv)
+
+
 def main():
+    args = parse_args()
+
     from kala.clock import now_wib
     now = now_wib()   # WIB, not server-local — is_idx_open must judge the IDX clock
 
     from kala.intraday import AlertDedup, is_idx_open, position_alerts, watchlist_alerts
 
-    force = "--force" in sys.argv  # for testing outside market hours
-    if not is_idx_open(now) and not force:
+    if not is_idx_open(now) and not args.force:
         return  # closed -> exit silently, costs nothing
 
-    cfg = json.loads(CONFIG_PATH.read_text()) if CONFIG_PATH.exists() else {}
+    cfg = json.loads(CONFIG_PATH.read_text(encoding="utf-8")) if CONFIG_PATH.exists() else {}
 
     from kala.notify import resolve_telegram_credentials, send_telegram
     from kala.papertrade import PaperTrader

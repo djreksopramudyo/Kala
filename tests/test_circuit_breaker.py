@@ -151,7 +151,7 @@ def test_missing_file_re_anchors_instead_of_crashing(tmp_path):
 
 def test_corrupt_file_re_anchors_instead_of_crashing(tmp_path):
     p = tmp_path / "breaker.json"
-    p.write_text("{not json at all")
+    p.write_text("{not json at all", encoding="utf-8")
     peak, halted = load_breaker_state(p)
     assert peak is None and halted is False
     # and a re-anchored evaluation must not halt
@@ -164,7 +164,7 @@ def test_save_is_atomic_leaving_no_tmp_file(tmp_path):
     save_breaker_state(p, evaluate_breaker(equity=100.0, cfg=ON))
     assert p.exists()
     assert not list(tmp_path.glob("*.tmp"))
-    assert json.loads(p.read_text())["peak"] == 100.0
+    assert json.loads(p.read_text(encoding="utf-8"))["peak"] == 100.0
 
 
 # ---------------- reporting ------------------------------------------------------

@@ -20,6 +20,7 @@ Telegram is down.
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
 
 import requests
 
@@ -119,13 +120,86 @@ def format_daily_message(report: dict, summary: dict | None = None,
     return "\n".join(lines)
 
 
-def send_telegram(token: str, chat_id: str, text: str, timeout: int = 15) -> bool:
-    """Send `text` to the chat. Returns True on success; on any failure (or if
-    token/chat_id are empty) it prints the message instead and returns False,
-    so the daily run still completes."""
+@dataclass(frozen=True)
+class Delivery:
+    """How much of a message actually reached the chat.
+
+    ``send_telegram`` returned a bare bool, and long messages are split into
+    several requests. A failure on the second of three chunks therefore left
+    the first one delivered and returned False — indistinguishable from
+    nothing being sent, and from the reader's side indistinguishable from a
+    complete message, because the part that arrived does not say it was a
+    part. The daily message carries the tickets first and the friction and
+    scorecard sections last, so the tail is what goes missing.
+    """
+    ok: bool = False
+    sent_chunks: int = 0
+    total_chunks: int = 0
+    error: str | None = None
+
+    @property
+    def partial(self) -> bool:
+        return 0 < self.sent_chunks < self.total_chunks
+
+    def describe(self) -> str:
+        if self.ok:
+            return f"delivered ({self.sent_chunks}/{self.total_chunks} parts)"
+        if self.partial:
+            return (f"PARTIALLY delivered — {self.sent_chunks} of "
+                    f"{self.total_chunks} parts reached the chat, the rest was "
+                    f"lost ({self.error}). The message on your phone is cut "
+                    f"off and does not say so.")
+        if self.error:
+            return f"NOT delivered ({self.error})"
+        return "NOT delivered (Telegram not configured)"
+
+
+CHUNK_CHARS = 3900  # Telegram caps at 4096; the '(i/N) ' label fits in the rest
+
+
+def send_telegram_detailed(token: str, chat_id: str, text: str,
+                           timeout: int = 15) -> Delivery:
+    """Send `text`, reporting how many parts got through.
+
+    Chunks are labelled ``(i/N)`` when there is more than one, so a missing
+    tail is visible in the chat itself rather than only in a log the reader
+    would have to think to check.
+    """
+    chunks = [text[i:i + CHUNK_CHARS] for i in range(0, len(text), CHUNK_CHARS)] or [""]
+    total = len(chunks)
     if not token or not chat_id:
         print("[notify] Telegram not configured — printing instead:\n" + text)
-        return False
+        return Delivery(ok=False, sent_chunks=0, total_chunks=total)
+
+    sent = 0
+    for i, chunk in enumerate(chunks, 1):
+        body = f"({i}/{total}) {chunk}" if total > 1 else chunk
+        try:
+            r = requests.post(
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                json={"chat_id": chat_id, "text": body},
+                timeout=timeout,
+            )
+            r.raise_for_status()
+            sent += 1
+        except Exception as e:  # noqa: BLE001 - reported, not swallowed
+            d = Delivery(ok=False, sent_chunks=sent, total_chunks=total,
+                         error=f"{type(e).__name__}: {e}")
+            print(f"[notify] {d.describe()} — printing the whole message "
+                  f"instead:\n" + text)
+            return d
+    return Delivery(ok=True, sent_chunks=sent, total_chunks=total)
+
+
+def send_telegram(token: str, chat_id: str, text: str, timeout: int = 15) -> bool:
+    """Send `text` to the chat. Returns True only when EVERY part got through.
+
+    Kept for the callers that only need a yes/no. Use
+    ``send_telegram_detailed`` where a partly-delivered message matters — the
+    bool cannot tell "nothing sent" from "half sent", and those are different
+    problems.
+    """
+    return send_telegram_detailed(token, chat_id, text, timeout).ok
     try:
         # Telegram caps messages at 4096 chars; split politely.
         for chunk_start in range(0, len(text), 3900):

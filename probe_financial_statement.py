@@ -42,7 +42,7 @@ def _probe_one(client: InvezgoClient, code: str, statement: str, type_: str, lim
     )
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / f"invezgo_probe_financial_statement_{statement}_{type_}.json"
-    out_path.write_text(json.dumps(data, indent=2))
+    out_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     n_periods = len(data) if isinstance(data, list) else (1 if data else 0)
     print(f"  {statement}/{type_}: saved {out_path}")

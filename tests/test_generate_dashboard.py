@@ -24,7 +24,7 @@ def _no_network(monkeypatch):
 def _empty_state(tmp_path, monkeypatch, config: dict | None = None):
     statefile = tmp_path / "paper_state.json"
     cfgfile = tmp_path / "runner_config.json"
-    cfgfile.write_text(json.dumps(config or {"start_capital_idr": 10_000_000}))
+    cfgfile.write_text(json.dumps(config or {"start_capital_idr": 10_000_000}), encoding="utf-8")
     return str(statefile), str(cfgfile)
 
 
@@ -88,4 +88,4 @@ def test_main_writes_html_file(tmp_path, monkeypatch):
     rc = gd.main()
     assert rc == 0
     assert out_path.exists()
-    assert len(out_path.read_text()) > 0
+    assert len(out_path.read_text(encoding="utf-8")) > 0

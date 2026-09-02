@@ -1,5 +1,7 @@
 """Paper-trader + notifier tests: fills, sizing, lots, allocation, persistence."""
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -703,13 +705,13 @@ def test_rotate_state_backup_creates_and_prunes(tmp_path):
     from kala.papertrade import rotate_state_backup
 
     state = tmp_path / "paper_state.json"
-    state.write_text(_json.dumps({"cash": 1}))
+    state.write_text(_json.dumps({"cash": 1}), encoding="utf-8")
     bdir = tmp_path / "backups"
 
     # seed 9 fake older backups; a rotate with keep=7 must leave the 7 newest
     for i in range(1, 10):
         (bdir / f"paper_state_202601{i:02d}.json").parent.mkdir(exist_ok=True)
-        (bdir / f"paper_state_202601{i:02d}.json").write_text("{}")
+        (bdir / f"paper_state_202601{i:02d}.json").write_text("{}", encoding="utf-8")
     dest = rotate_state_backup(state, bdir, keep=7)
     assert dest is not None and dest.exists()
     remaining = sorted(bdir.glob("paper_state_*.json"))
@@ -742,18 +744,18 @@ def test_backup_restores_to_an_identical_trader_after_corruption(tmp_path):
     pt.manual_buy("ANTM.JK", shares=200, price=1500.0, date="2026-07-10")
     pt.manual_buy("BBRI.JK", shares=100, price=4000.0, date="2026-07-11")
     pt.manual_sell("ANTM.JK", price=1650.0, date="2026-07-14")   # a closed trade in the log
-    original_json = state.read_text()
+    original_json = state.read_text(encoding="utf-8")
 
     bdir = tmp_path / "backups"
     backup = rotate_state_backup(state, bdir)
     assert backup is not None and backup.exists()
 
     # simulate corruption: overwrite the live state with garbage
-    state.write_text("{ this is not valid json at all")
+    state.write_text("{ this is not valid json at all", encoding="utf-8")
 
     # restore from the backup, exactly as an operator would
     shutil.copy2(backup, state)
-    assert state.read_text() == original_json                     # bytes identical
+    assert state.read_text(encoding="utf-8") == original_json                     # bytes identical
 
     # and the reloaded trader is the same account
     restored = PaperTrader.load(state, start_capital=10_000_000, cfg=flat_cfg())
@@ -1079,3 +1081,71 @@ def test_undo_reverts_manual_buy_on_held_ticker_to_pre_blend_state(tmp_path):
     assert pos.entry_price == pytest.approx(buy_fill(1000.0))
     assert pos.peak_price == 1300.0
     assert pos.entry_date == "2026-07-01"
+
+
+def test_recent_performance_reports_trades_it_could_not_place_in_time(tmp_path):
+    """A trade with an unreadable date was dropped in SILENCE.
+
+    This function's stated contract is "every closed trade in the window
+    counts, wins and losses alike, nothing held back". A dropped LOSS raises
+    the advertised win rate, which is the one number the docstring sells.
+    """
+    from datetime import date as _date
+    pt = PaperTrader.load(tmp_path / "p.json", start_capital=10_000_000, cfg=flat_cfg())
+    pt.manual_buy("WIN.JK", shares=100, price=1000.0, date="2026-07-10")
+    pt.manual_sell("WIN.JK", price=1100.0, date="2026-07-12")     # win
+    pt.manual_buy("LOSE.JK", shares=100, price=1000.0, date="2026-07-11")
+    pt.manual_sell("LOSE.JK", price=900.0, date="2026-07-13")     # loss
+
+    # Corrupt the LOSS's date, the direction that flatters the number.
+    for entry in pt.log:
+        if entry["ticker"] == "LOSE.JK":
+            entry["date"] = "not-a-date"
+
+    r = pt.recent_performance(days=7, today=_date(2026, 7, 14))
+    assert r["skipped_unparseable"] == 1, "the dropped trade is not reported"
+    assert r["n"] == 1
+    assert r["win_rate_pct"] == pytest.approx(100.0)   # the flattered number...
+    # ...which is only defensible because the count above says it is partial.
+
+
+def test_recent_performance_reports_zero_skipped_on_a_clean_log(tmp_path):
+    """Non-vacuity: a constant 1 would satisfy the test above."""
+    from datetime import date as _date
+    pt = PaperTrader.load(tmp_path / "p.json", start_capital=10_000_000, cfg=flat_cfg())
+    pt.manual_buy("A.JK", shares=100, price=1000.0, date="2026-07-10")
+    pt.manual_sell("A.JK", price=1100.0, date="2026-07-12")
+    r = pt.recent_performance(days=7, today=_date(2026, 7, 14))
+    assert r["skipped_unparseable"] == 0
+    assert r["n"] == 1
+
+
+def test_recent_performance_counts_a_missing_date_key_too(tmp_path):
+    """KeyError and ValueError are the same failure to the reader."""
+    from datetime import date as _date
+    pt = PaperTrader.load(tmp_path / "p.json", start_capital=10_000_000, cfg=flat_cfg())
+    pt.manual_buy("A.JK", shares=100, price=1000.0, date="2026-07-10")
+    pt.manual_sell("A.JK", price=1100.0, date="2026-07-12")
+    del pt.log[0]["date"]
+    r = pt.recent_performance(days=7, today=_date(2026, 7, 14))
+    assert r["skipped_unparseable"] == 1
+    assert r["n"] == 0
+
+
+def test_a_trade_merely_outside_the_window_is_not_counted_as_unparseable(tmp_path):
+    """Out-of-window is a normal exclusion; unreadable is a data fault."""
+    from datetime import date as _date
+    pt = PaperTrader.load(tmp_path / "p.json", start_capital=10_000_000, cfg=flat_cfg())
+    pt.manual_buy("OLD.JK", shares=100, price=1000.0, date="2026-01-05")
+    pt.manual_sell("OLD.JK", price=1100.0, date="2026-01-07")
+    r = pt.recent_performance(days=7, today=_date(2026, 7, 14))
+    assert r["n"] == 0
+    assert r["skipped_unparseable"] == 0, "an old trade is not a corrupt one"
+
+
+def test_the_live_performance_message_surfaces_the_skipped_count():
+    """A count nobody reads is not a fix."""
+    src = (Path(__file__).resolve().parent.parent / "telegram_bot.py").read_text(
+        encoding="utf-8")
+    assert 'r.get("skipped_unparseable")' in src
+    assert "incomplete log" in src

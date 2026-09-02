@@ -745,7 +745,15 @@ def _get_ihsg_benchmark():
     if 'ihsg' not in _BENCHMARK_CACHE:
         try:
             _BENCHMARK_CACHE['ihsg'] = download_stock_data('^JKSE', START_DATE, END_DATE)
-        except Exception:
+        except Exception as _e:  # noqa: BLE001 - announced, not swallowed
+            # "alpha lines are then skipped" was the documented behaviour, and
+            # a SKIPPED alpha section is indistinguishable from a report that
+            # had no alpha to show. That is the same failure this project found
+            # in run_walkforward (see CHANGES.md "Finding 8"): the absence of a
+            # section reads as a shorter report, not a broken one. Say it once.
+            print(f"  WARNING: IHSG benchmark unavailable ({type(_e).__name__}: "
+                  f"{_e}). Every alpha / benchmark-relative line below is "
+                  f"OMITTED — that is not the same as 'no alpha'.")
             _BENCHMARK_CACHE['ihsg'] = None
     return _BENCHMARK_CACHE['ihsg']
 
@@ -1337,7 +1345,9 @@ def get_live_signal(ticker: str, fast_sma: int = 10, slow_sma: int = 50,
                                 or 'BUY' in str(result.get('composite_signal', '')))
             if needs_veto_check:
                 from kala.entries import evaluate_entry
-                _entry = evaluate_entry(data, market_status=None)
+                from kala.entry_settings import load_entry_config
+                _ecfg, _ = load_entry_config()
+                _entry = evaluate_entry(data, market_status=None, cfg=_ecfg)
                 result['entry_vetoes'] = _entry.vetoes
                 if not _entry.allowed:
                     if 'BUY' in str(result.get('signal', '')):
@@ -1345,8 +1355,13 @@ def get_live_signal(ticker: str, fast_sma: int = 10, slow_sma: int = 50,
                         result['reason'] = ('vetoed: ' + '; '.join(_entry.vetoes))[:160]
                     if 'BUY' in str(result.get('composite_signal', '')):
                         result['composite_signal'] = 'HOLD'
-        except Exception:
-            pass
+        except Exception as _e:  # noqa: BLE001 - reported, not swallowed
+            # A crash here left the BUY standing with an EMPTY veto list, and an
+            # empty list means "nothing fired" — a different fact from "nothing
+            # ran". Same fail-open as kala_daily_trader's, fixed the same
+            # way: the failure travels in the field a reader looks at.
+            from kala.entry_settings import veto_check_failed_note
+            result['entry_vetoes'] = [veto_check_failed_note(_e)]
 
         return result
 
@@ -1670,8 +1685,13 @@ def analyze_watchlist(optimize: bool = True):
         from kala.universe import UNIVERSE_IS_POINT_IN_TIME
         if not UNIVERSE_IS_POINT_IN_TIME:
             print("WARNING: universe is CURRENT DES membership -> backtests are\n         survivorship-biased (optimistic). Use point-in-time lists to fix.")
-    except Exception:
-        pass
+    except Exception as _e:  # noqa: BLE001 - a MISSING warning is the danger
+        # If this import fails the survivorship warning simply does not print,
+        # and a biased backtest then runs looking clean. A warning that can
+        # vanish is worse than no warning: its absence reads as "no problem".
+        print(f"WARNING: could not determine whether the universe is "
+              f"point-in-time ({type(_e).__name__}: {_e}). Assume these "
+              f"backtests are SURVIVORSHIP-BIASED until shown otherwise.")
     print("="*60)
 
     results = {}

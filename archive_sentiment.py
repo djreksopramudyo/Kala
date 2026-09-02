@@ -19,39 +19,31 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from kala.clock import today_str_wib
 from kala.news import get_news_sentiment
 from kala.reddit_sentiment import get_reddit_sentiment
 from kala.sentiment_archive import SentimentArchive
+from kala.universe_sources import default_universe
 
-STATE_PATH = "paper_state.json"
-WATCHLIST_PATH = "watchlist.json"
+# Anchored to the repository, not the caller's working directory. A bare
+# "paper_state.json" resolves against cwd, so the same command archives a
+# different (silently smaller) universe depending on where it is run from.
+ROOT = Path(__file__).resolve().parent
+STATE_PATH = ROOT / "paper_state.json"
+WATCHLIST_PATH = ROOT / "watchlist.json"
 
 
 def _tickers_to_archive(explicit: list[str] | None) -> list[str]:
     """Explicit --tickers if given, else the union of open paper-trading
     positions and the watchlist -- the names actually worth tracking
-    sentiment on. Each source degrades to 'contributes nothing' on any
-    failure (missing state file, corrupt JSON) rather than crashing the
-    whole run."""
+    sentiment on. Each source still degrades to 'contributes nothing' rather
+    than crashing the whole run, but now says so on stderr; see
+    kala/universe_sources.py for why the silence mattered."""
     if explicit:
         return list(explicit)
-
-    tickers: set[str] = set()
-    try:
-        from kala.papertrade import PaperTrader
-        pt = PaperTrader.load(STATE_PATH, start_capital=10_000_000)
-        tickers.update(pt.positions)
-    except Exception:
-        pass
-    try:
-        from kala.watchlist import WatchlistStore
-        wl = WatchlistStore.load(WATCHLIST_PATH)
-        tickers.update(item.ticker for item in wl)
-    except Exception:
-        pass
-    return sorted(tickers)
+    return default_universe(STATE_PATH, WATCHLIST_PATH).tickers
 
 
 def main() -> int:

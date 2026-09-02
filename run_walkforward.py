@@ -35,7 +35,9 @@ Network access happens ONLY here — kala.walkforward is pure logic.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from pathlib import Path
 
 import pandas as pd
 import yfinance as yf
@@ -51,14 +53,37 @@ import kala.strategy_mean_reversion  # noqa: F401  (registers "mean_reversion" i
 import kala.strategy_multihorizon_trend  # noqa: F401  (registers "multihorizon_trend")
 import kala.strategy_ramadan_effect  # noqa: F401  (registers "ramadan_effect" in the zoo)
 import kala.strategy_support_resistance  # noqa: F401  (registers "support_resistance")
-from kala.config import BacktestConfig, Config, CostModel, EntryConfig, us_equity_costs
+from kala.clock import today_str_wib
+from kala.config import (
+    BacktestConfig,
+    Config,
+    CostModel,
+    EntryConfig,
+    config_for_profile,
+    us_equity_costs,
+)
 from kala.strategies import get_strategy, list_strategies, walk_forward_strategy
 from kala.strategy_broker_concentration import SHARE_COLUMN
 from kala.strategy_foreign_flow import FLOW_COLUMN, attach_foreign_flow
+from kala.synthetic_benchmark import describe, equal_weight_benchmark
 from kala.universe import ALL_SHARIA_STOCKS, US_SHARIA_STOCKS
+from kala.walkforward import excess_ev
 
 BROKER_FLOW_STRATEGIES = ("foreign_flow", "broker_concentration")
 
+# The five filters --apply-entry-vetoes switches on together. Each already has
+# its own EntryConfig flag; only the CLI lacked a way to separate them, so the
+# measured -4.2 point cost of the vetoes could not be attributed to any one of
+# them. Leave-one-out over this map is what attributes it.
+VETO_FLAGS = {
+    "rsi":         "veto_overbought",       # RSI >= 75
+    "parabolic":   "veto_parabolic",        # +25% in 20 sessions
+    "obv":         "veto_distribution",     # price up while OBV falls
+    "thin_volume": "veto_thin_volume",      # surge unconfirmed by volume
+    "bear":        "block_buys_in_bear",    # market regime BEARISH/MODERATE_BEAR
+}
+
+EQUAL_WEIGHT = "EQUAL_WEIGHT"   # sentinel: build the benchmark from the universe
 BENCHMARK = "^JKSE"      # IHSG -- default, overridable via --benchmark (see its help text
                          # for why this default is arguably the WRONG choice for this
                          # project's sharia-only universe)
@@ -109,7 +134,8 @@ def _freshness_target_iso(end: pd.Timestamp, slack_bdays: int = 1) -> str:
 
 def fetch(tickers: list[str], period: str, min_price: float = MIN_PRICE,
          warehouse_path: str | None = None,
-         needs_dividends: bool = False) -> dict[str, pd.DataFrame]:
+         needs_dividends: bool = False,
+         trust_short_cache: bool = False) -> dict[str, pd.DataFrame]:
     """Batch-download OHLCV and keep only clean, sufficiently long histories.
 
     ``min_price`` filters on the LATEST close only (a listing-quality floor,
@@ -174,11 +200,41 @@ def fetch(tickers: list[str], period: str, min_price: float = MIN_PRICE,
             # against "today" made every weekend and holiday an automatic miss.
             fresh_iso = _freshness_target_iso(end)
             still_needed = []
+            why = {"absent": 0, "too_short": 0, "stale_tail": 0}
             for t in tickers:
                 covered = wh.covered_range(t)
                 spans_start = bool(covered) and covered[0] <= start_iso
                 tail_fresh = bool(covered) and covered[1] >= fresh_iso
-                if spans_start and tail_fresh:
+                # A delisted or suspended ticker's newest bar is old forever, so
+                # tail_fresh can never be satisfied and it was re-downloaded on
+                # every single run. If we already asked TODAY and the source had
+                # nothing newer, asking again cannot change the answer.
+                #
+                # Deliberately NOT extended to spans_start: a cache that is too
+                # SHORT must still trigger a re-fetch, because the source may
+                # hold more history than a previous call returned. See
+                # test_warehouse_refetches_when_cached_history_is_too_short —
+                # dropping such a ticker silently shrinks the universe.
+                if spans_start and not tail_fresh and wh.is_as_fresh_as_it_gets(t, end_iso):
+                    tail_fresh = True
+
+                # A ticker listed AFTER the requested start can never satisfy
+                # spans_start, so it is re-downloaded on every run forever. On a
+                # 5y request over the IDX sharia list that is ~30% of the
+                # universe — all of it "history too short", none of it stale.
+                #
+                # OFF by default: test_warehouse_refetches_when_cached_history_is
+                # _too_short deliberately requires a short cache to trigger a
+                # re-fetch, because a previous call may simply have been
+                # truncated. That premise holds ACROSS days; within one day the
+                # source returns the same history to the same request, so
+                # trust_short_cache=True is safe for repeated sweeps and is what
+                # makes parallel runs free.
+                short_but_exhausted = (
+                    trust_short_cache and not spans_start
+                    and wh.is_as_fresh_as_it_gets(t, end_iso))
+
+                if (spans_start and tail_fresh) or short_but_exhausted:
                     cached = wh.read(t, start_iso, end_iso)
                     if cached is not None and _passes_filters(cached, min_price):
                         dfs[t] = cached
@@ -189,10 +245,22 @@ def fetch(tickers: list[str], period: str, min_price: float = MIN_PRICE,
                     # tail. The too-short case previously matched neither branch
                     # and made the ticker vanish from the study entirely -- worse
                     # than re-fetching, since it silently shrank the universe.
+                    if not covered:
+                        why["absent"] += 1
+                    elif not spans_start:
+                        why["too_short"] += 1
+                    else:
+                        why["stale_tail"] += 1
                     still_needed.append(t)
             if len(dfs) < len(tickers):
+                # Break the re-fetch count down by CAUSE. A count that never
+                # shrinks between runs is the visible symptom of a cache that
+                # cannot answer a question it will be asked again tomorrow; the
+                # breakdown says which question.
                 print(f"  warehouse: {len(tickers) - len(still_needed)}/{len(tickers)} "
-                     f"ticker(s) already covered, fetching {len(still_needed)}")
+                     f"ticker(s) already covered, fetching {len(still_needed)} "
+                     f"(never stored: {why['absent']}, history too short for "
+                     f"{period}: {why['too_short']}, stale tail: {why['stale_tail']})")
 
     if still_needed:
         print(f"Downloading {len(still_needed)} ticker(s) ({period})...")
@@ -203,10 +271,20 @@ def fetch(tickers: list[str], period: str, min_price: float = MIN_PRICE,
                 df = (raw[t].dropna(subset=["Close"]) if len(still_needed) > 1
                      else raw.dropna(subset=["Close"]))
             except KeyError:
+                # The download returned nothing for this ticker. That is still an
+                # ANSWER — record it, or the ticker is retried on every run.
+                if wh is not None:
+                    wh.record_fetch_attempt(
+                        t, pd.Timestamp.today().strftime("%Y-%m-%d"), None)
                 continue
             df = df[["Open", "High", "Low", "Close", "Volume"]]
             if wh is not None:
                 wh.upsert(t, df)
+                # Record the ATTEMPT, not just the data, so a ticker whose newest
+                # bar is permanently old stops being re-fetched every run.
+                newest = df.index[-1].strftime("%Y-%m-%d") if len(df) else None
+                wh.record_fetch_attempt(t, pd.Timestamp.today().strftime("%Y-%m-%d"),
+                                        newest)
             if _passes_filters(df, min_price):
                 dfs[t] = df
 
@@ -214,7 +292,230 @@ def fetch(tickers: list[str], period: str, min_price: float = MIN_PRICE,
     return dfs
 
 
-def main() -> int:
+def build_run_config(exit_profile: str, costs, apply_entry_vetoes: bool,
+                     veto_ranging_stock: bool, holding_days: int | None = None,
+                     disabled_vetoes: tuple | None = None,
+                     baseline_threshold: float | None = None):
+    """Compose the Config a walk-forward run validates through.
+
+    Extracted from main() so the wiring itself is testable. Checking that the
+    profile FUNCTION returns the right settings proves nothing about whether
+    the flag reaches the harness — that gap is how a run labelled "exits off"
+    can quietly execute the ordinary ladder and return an ordinary negative.
+
+    ``baseline_threshold`` is the "fixed baseline" arm of the walk-forward —
+    the control that does NOT get to pick a threshold per fold, and the arm
+    the printed VERDICT is computed from. It must be on the SCALE OF THE
+    SIGNAL BEING TESTED.
+
+    That last sentence is here because the profile got it wrong. Passing a
+    cfg to walk_forward_strategy overrides the strategy's own
+    ``default_threshold``, and ``forward_test`` carries 80 — a number from
+    the composite-score work. Applied to support_resistance (own grid tops
+    out at 60) or dividend_yield (tops out at 70), the baseline arm sat
+    ABOVE the strategy's entire grid, traded almost nothing, and the verdict
+    printed from it meant nothing. Default None now means "use the
+    strategy's own", which is what walk_forward_strategy does when no cfg
+    overrides it.
+    """
+    profile = config_for_profile(exit_profile)
+    hold = holding_days or profile.backtest.holding_max_days
+    thr = (profile.backtest.score_entry_threshold if baseline_threshold is None
+           else float(baseline_threshold))
+    return Config(
+        risk=profile.risk,
+        backtest=BacktestConfig(
+            apply_entry_vetoes=apply_entry_vetoes,
+            score_entry_threshold=thr,
+            holding_max_days=hold,
+        ),
+        costs=costs,
+        entries=EntryConfig(veto_ranging_stock=veto_ranging_stock,
+                            **{VETO_FLAGS[name]: False
+                               for name in (disabled_vetoes or ())}))
+
+
+# Baseline-arm reporting is pure so it can be tested by CALLING it. An earlier
+# version of these tests asserted on the source text of main(), which passed
+# happily when the whole block was made unreachable — a test that reads the
+# source cannot tell live code from dead code.
+
+THIN_ARM_FRACTION = 0.2
+
+
+def baseline_provenance_lines(threshold: float, default_threshold: float,
+                              grid=None) -> list[str]:
+    """Lines describing where the fixed-baseline threshold came from.
+
+    The verdict is computed from the fixed-baseline arm, not from the per-fold
+    chosen thresholds, so a reader has to be able to see whether that baseline
+    is this strategy's own number or one carried in from another signal's
+    scale. `--exit-profile forward_test` supplies 80, which comes from the
+    composite score's work; applied to mean_reversion or support_resistance it
+    is a number from a different scale entirely.
+    """
+    head = f"fixed-baseline threshold: {threshold:.0f} (strategy default {default_threshold:.0f}"
+    if grid:
+        head += f", grid {min(grid):.0f}-{max(grid):.0f}"
+    lines = [
+        head + ")",
+        "  ^ the VERDICT below is computed from this arm, not from the per-fold",
+        "    chosen thresholds — which is why the baseline's provenance is printed",
+        ("    beside it: the strategy's own default, and the grid it searches."
+         if grid else
+         "    beside it: the strategy's own default. It declares no grid."),
+    ]
+    if grid and not (min(grid) <= threshold <= max(grid)):
+        # Outside the SEARCH grid is not the same as invalid. These scores are
+        # 0-100, so a baseline above the grid is a tighter-than-searched
+        # threshold that may still trade plenty. Whether it does is a
+        # measurement taken after the run, not a guess made from the grid.
+        lines += [
+            f"  NOTE: baseline {threshold:.0f} sits outside the search grid "
+            f"({min(grid):.0f}-{max(grid):.0f}).",
+            "    That is allowed. The grid is the range the per-fold selection",
+            "    searches, not the range of valid scores. Momentum's own headline",
+            "    run had a baseline of 80 against a 50-75 grid and traded 5,241",
+            "    times. What settles it is the arm's trade count, measured below.",
+        ]
+    return lines
+
+
+def thin_baseline_arm_warning(n_baseline: int, n_chosen: int) -> str | None:
+    """The check the pre-run grid comparison cannot make.
+
+    Returns None when the baseline arm traded enough to carry a verdict.
+
+    A run where NOTHING traded needs no guard of its own: with n_chosen at 0
+    the threshold is 0 too, so any count clears it and no warning is emitted.
+    That is the right answer — a run with no trades at all is not a thin-arm
+    story, and saying "the baseline arm is thin" would point the reader at the
+    baseline when the problem is upstream of it.
+    """
+    if n_baseline >= THIN_ARM_FRACTION * n_chosen:
+        return None
+    return (f"\nWARNING: the fixed-baseline arm traded {n_baseline} vs "
+            f"{n_chosen} in the walk-forward arm — under a fifth. The VERDICT "
+            f"above comes from that thin arm; treat it as unreliable and read "
+            f"the walk-forward numbers instead.")
+
+
+def run_provenance(args, strategy, cfg, n_tickers: int, *, measured_at: str) -> dict:
+    """The metadata half of a saved fold table: WHAT the run was.
+
+    Pure, and separate from the fold rows, so a test can call it. The fields
+    it carries were added once before as an inline dict edit that silently
+    matched nothing — the claim "the saved JSON records the veto arm" sat in
+    CHANGES.md while fifteen real runs were written without those keys, and
+    the only thing telling a no-veto table from an all-veto one was its
+    filename. A source-text assertion would not have caught that either; only
+    calling this does.
+
+    ``measured_at`` is a required keyword, not a ``datetime.now()`` inside the
+    body, so this stays pure and a test can pin the stamp. Required rather than
+    defaulted because the daily run's staleness check reads it: a table that
+    silently omits the date is one the live path can only call "age unknown"
+    forever.
+    """
+    grid = getattr(strategy, "default_thresholds_grid", None)
+    return {
+        "strategy": strategy.name,
+        "exit_profile": args.exit_profile,
+        "baseline_threshold": cfg.backtest.score_entry_threshold,
+        "holding_max_days": cfg.backtest.holding_max_days,
+        "benchmark": args.benchmark,
+        # Which veto arm produced this table.
+        "apply_entry_vetoes": bool(args.apply_entry_vetoes),
+        "disabled_vetoes": sorted(args.disable_veto),
+        "n_tickers": n_tickers,
+        # Which spread model this measurement charged. The live book charges
+        # whatever runner_config.json says (default flat), and flat is 0.23
+        # points per trade cheaper than tick_floor on this account's own
+        # holdings — always in the direction that flatters the live result.
+        # A measurement taken under one model does not describe a book kept
+        # under the other.
+        "spread_mode": cfg.costs.spread_mode,
+        "measured_at": measured_at,
+        # How many thresholds the deflated Sharpe was deflating for. Without
+        # it a reader — or the live path — cannot tell a DSR that discounts a
+        # 6-value grid from one discounting a 60-value grid, and the verdict
+        # cannot apply its deflation clause at all.
+        "threshold_grid_size": len(grid) if grid else 0,
+    }
+
+
+def fold_row(fr) -> dict:
+    """One saved fold. Split out so ``saved_table`` can be called in a test.
+
+    Carries BOTH arms' per-fold excess. ``excess_pct`` is the walk-forward
+    chosen arm, as it always was; ``excess_baseline_pct`` is the fixed-baseline
+    arm and is new.
+
+    It is new because the table could not previously support its own
+    decomposition. Every headline this project quotes — +1.71%/trade, the
+    clustered t, the deflated Sharpe, the VERDICT — comes from the BASELINE
+    arm, while the only per-fold excess on file was the CHOSEN arm's. Anything
+    computing "the pooled figure minus its biggest fold" was therefore
+    subtracting one arm's fold from another arm's total. The two arms pooled to
+    +1.71% and +1.27% over different trade counts, so the result was not a
+    decomposition of either.
+    """
+    return {
+        "fold": fr.fold.fold_id,
+        "start": str(fr.fold.test_start.date()),
+        "end": str(fr.fold.test_end.date()),
+        "threshold": fr.chosen_threshold,
+        "n": fr.oos_chosen["n"],
+        "ev_pct": fr.oos_chosen["ev_pct"],
+        "win_rate_pct": fr.oos_chosen["win_rate_pct"],
+        "benchmark_pct": fr.benchmark_return_pct,
+        "excess_pct": excess_ev(fr.oos_excess_chosen),
+        "n_baseline": (fr.oos_excess_baseline or {}).get("n", 0),
+        "excess_baseline_pct": excess_ev(fr.oos_excess_baseline),
+    }
+
+
+def saved_table(provenance: dict, report) -> dict:
+    """The exact dict written to --save-folds.
+
+    Extracted from ``main`` because the tie between ``run_provenance`` and the
+    file on disk used to be asserted by grepping this module's source for the
+    call — and a source-text assertion is not a test. The same claim went
+    unverified once already: a patch that was supposed to add the veto fields
+    matched nothing, the source-grep still passed on the OLD line it anchored
+    to, and fifteen runs were written without them. Calling this is the only
+    way to know what the file will contain.
+
+    ``report`` is duck-typed on purpose so a test can pass a stand-in instead
+    of running a walk-forward.
+    """
+    return {
+        **provenance,
+        "folds": [fold_row(fr) for fr in report.folds],
+        "pooled_excess_baseline": report.pooled_excess_baseline,
+        # The chosen arm's pooled excess was never saved — only its clustered t
+        # and DSR were, which is a correction with nothing to correct.
+        "pooled_excess_chosen": report.pooled_excess_chosen,
+        "pooled_excess_clustered_t": report.pooled_excess_clustered_t,
+        "pooled_excess_dsr": report.pooled_excess_dsr,
+        # The ALPHA VERDICT is judged on the BASELINE arm, so a saved table
+        # without these cannot reproduce the verdict it was printed with —
+        # only the chosen arm's figures were being kept.
+        "pooled_excess_baseline_clustered_t":
+            report.pooled_excess_baseline_clustered_t,
+        "pooled_excess_baseline_dsr": report.pooled_excess_baseline_dsr,
+    }
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """The CLI, split out of ``main`` so it can be parsed without running.
+
+    Extracted so the daily run's "to measure THIS configuration" command can be
+    round-tripped in a test: generate it, parse it HERE, build the provenance,
+    and assert the expectation block accepts the result. That instruction used
+    to be a fixed string which — followed literally against a tick-floored book
+    — produced a table the block then refused.
+    """
     ap = argparse.ArgumentParser(description="Walk-forward OOS validation of the composite-score edge")
     ap.add_argument("--tickers", nargs="*", default=None,
                     help="explicit ticker list; default = evenly spaced sample of the universe")
@@ -285,8 +586,57 @@ def main() -> int:
                          "backtest. Backfill it first with the Invezgo adapter (see "
                          "BROKER_FLOW_DATA_SPEC.md); tickers absent from it simply never "
                          "trade rather than erroring.")
+    ap.add_argument("--trust-short-cache", action="store_true",
+                    help="do not re-download tickers whose history is simply too "
+                         "short for --period. The source cannot supply bars from "
+                         "before a stock listed, so re-asking never helps; on a 5y "
+                         "IDX run that is ~30%% of the universe re-fetched every "
+                         "time. Safe for repeated runs on the same day.")
+    ap.add_argument("--exit-profile", default="legacy",
+                    choices=("legacy", "forward_test"),
+                    help="which exit geometry to VALIDATE THROUGH. 'legacy' is the "
+                         "stop/target/trailing ladder every historical number in "
+                         "PROJECT_STATUS was computed under. 'forward_test' turns "
+                         "every price-based exit off, leaving holding_max_days as "
+                         "the only close. Use it to ask whether a standing "
+                         "'unvalidated' verdict describes the SIGNAL or the exits "
+                         "it was measured through — the ladder was later found to "
+                         "subtract ~1.6 points per trade.")
+    ap.add_argument("--save-folds", default=None, metavar="PATH",
+                    help="write this run's per-fold table to JSON. Ten runs have "
+                         "now been compared by pasting terminal output and "
+                         "reading columns by eye; one transcription slip in that "
+                         "loop is invisible. Saved runs can be compared "
+                         "mechanically with compare_folds.py.")
+    ap.add_argument("--baseline-threshold", type=float, default=None,
+                    help="entry threshold for the FIXED BASELINE arm — the "
+                         "control the printed VERDICT is computed from. Default: "
+                         "the strategy's own default_threshold for any strategy "
+                         "other than momentum. Set this only if you know the "
+                         "signal's scale; a value outside the strategy's grid "
+                         "makes the baseline arm trade nothing and its verdict "
+                         "meaningless.")
+    ap.add_argument("--holding-days", type=int, default=None,
+                    help="override holding_max_days (default: the profile's)")
+    ap.add_argument("--disable-veto", nargs="*", default=[], choices=sorted(VETO_FLAGS),
+                    metavar="NAME",
+                    help="switch OFF individual entry vetoes that "
+                         "--apply-entry-vetoes would otherwise enable: "
+                         + ", ".join(sorted(VETO_FLAGS)) + ". Measured: the "
+                         "vetoes as a group cost -4.2 points of excess "
+                         "(+1.71%% -> -2.52%%, clustered t -3.10), but the group "
+                         "is five filters and the cost has never been "
+                         "attributed to any one. Leave-one-out does that: run "
+                         "--apply-entry-vetoes once per name with that name "
+                         "disabled, and whichever removal recovers the most is "
+                         "the culprit. No effect without --apply-entry-vetoes.")
     ap.add_argument("--benchmark", default=BENCHMARK,
-                    help=f"yfinance ticker for the alpha-vs-beta comparison (default "
+                    help=f"yfinance ticker, or the literal EQUAL_WEIGHT to build an "
+                         f"equal-weighted, daily-rebalanced index from the traded "
+                         f"universe itself (no index-composition mismatch: it answers "
+                         f"'did picking these beat buying all of them?'). "
+                         f"^JKII is the Jakarta Islamic Index, sharia-screened but only "
+                         f"the 30 largest, cap-weighted. Default "
                          f"{BENCHMARK}, IHSG -- the full IDX composite). ARGUABLY WRONG "
                          f"for this project: the tradeable universe is sharia-screened "
                          f"only (kala.universe.ALL_SHARIA_STOCKS), and IHSG includes "
@@ -302,12 +652,27 @@ def main() -> int:
                          f"verdicts in PROJECT_STATUS.md used the IHSG default -- rerun "
                          f"with the correct ticker once confirmed rather than assuming "
                          f"the old numbers transfer.")
-    args = ap.parse_args()
+    return ap
+
+
+def main() -> int:
+    args = build_parser().parse_args()
 
     if args.veto_ranging_stock and not args.apply_entry_vetoes:
         print("--veto-ranging-stock has no effect without --apply-entry-vetoes "
              "(the veto lives in entries.evaluate_entry, which only runs when "
              "that flag is set) — add --apply-entry-vetoes too.", file=sys.stderr)
+        return 1
+
+    # Same shape as the guard above: without --apply-entry-vetoes no veto runs
+    # at all, so "disable one of them" is a no-op that would produce a run
+    # indistinguishable from the plain no-veto arm — and get filed under a name
+    # implying it measured something about that veto.
+    if args.disable_veto and not args.apply_entry_vetoes:
+        print(f"--disable-veto {' '.join(args.disable_veto)} has no effect without "
+             "--apply-entry-vetoes: with that flag absent NO veto runs, so this "
+             "would silently reproduce the plain no-veto arm under a misleading "
+             "filename. Add --apply-entry-vetoes.", file=sys.stderr)
         return 1
 
     if args.strategy in BROKER_FLOW_STRATEGIES and not args.broker_flow_db:
@@ -339,7 +704,8 @@ def main() -> int:
         print(f"min price: IDR {args.min_price:.0f} | spread: "
              f"{'tick-floored' if args.tick_spread else 'flat 0.10%'}")
     dfs = fetch(tickers, args.period, min_price=args.min_price, warehouse_path=args.warehouse,
-               needs_dividends=strategy.needs_dividends)
+               needs_dividends=strategy.needs_dividends,
+               trust_short_cache=args.trust_short_cache)
     if not dfs:
         print("No usable data — check network / period.", file=sys.stderr)
         return 1
@@ -388,10 +754,18 @@ def main() -> int:
     print(f"benchmark: {args.benchmark}"
          + ("  (default IHSG -- see --help for why ISSI may be more correct here)"
             if args.benchmark == BENCHMARK else ""))
-    bench = yf.download(args.benchmark, period=args.period, auto_adjust=True, progress=False)
-    if isinstance(bench.columns, pd.MultiIndex):
-        bench.columns = bench.columns.get_level_values(0)
-    bench = bench.dropna(subset=["Close"]) if len(bench) else None
+    if args.benchmark == EQUAL_WEIGHT:
+        # Built from the SAME tickers the strategy chooses from, so the
+        # comparison is "did picking these beat buying all of them?" — with no
+        # index-composition mismatch to launder into apparent alpha.
+        bench = equal_weight_benchmark(dfs)
+        print("  " + describe(bench))
+    else:
+        bench = yf.download(args.benchmark, period=args.period, auto_adjust=True,
+                            progress=False)
+        if isinstance(bench.columns, pd.MultiIndex):
+            bench.columns = bench.columns.get_level_values(0)
+        bench = bench.dropna(subset=["Close"]) if len(bench) else None
     if bench is None or bench.empty:
         print(f"  WARNING: no data for benchmark '{args.benchmark}' -- check the ticker "
              "is valid on yfinance before trusting the alpha/excess numbers below "
@@ -399,11 +773,42 @@ def main() -> int:
 
     costs = (us_equity_costs() if args.cost_preset == "us_equity"
             else CostModel(spread_mode="tick_floor" if args.tick_spread else "flat"))
-    cfg = Config(backtest=BacktestConfig(apply_entry_vetoes=args.apply_entry_vetoes),
-                 costs=costs,
-                 entries=EntryConfig(veto_ranging_stock=args.veto_ranging_stock))
+    # Start from the chosen exit profile, then layer this run's CLI overrides
+    # on top of it — so --exit-profile decides the exit geometry while the
+    # veto/cost flags keep behaving exactly as before.
+    # The baseline arm must sit on the tested signal's own scale. An explicit
+    # --baseline-threshold wins; otherwise a non-momentum strategy uses its own
+    # default rather than inheriting the profile's composite-score number.
+    baseline = args.baseline_threshold
+    if baseline is None and strategy.name != "momentum":
+        baseline = strategy.default_threshold
+    cfg = build_run_config(args.exit_profile, costs, args.apply_entry_vetoes,
+                           args.veto_ranging_stock, args.holding_days,
+                           disabled_vetoes=tuple(args.disable_veto),
+                           baseline_threshold=baseline)
+    holding = cfg.backtest.holding_max_days
+    if args.exit_profile == "forward_test":
+        print(f"exit profile: FORWARD_TEST — no stop/target/trailing, "
+              f"hold {holding}d, entry score >= "
+              f"{cfg.backtest.score_entry_threshold:.0f}. NOT comparable with the "
+              "historical numbers in PROJECT_STATUS, which were all computed "
+              "through the ladder.")
+    else:
+        print(f"exit profile: legacy (stop/target/trailing active, hold {holding}d)")
+    if args.apply_entry_vetoes:
+        off = sorted(args.disable_veto)
+        on = [n for n in sorted(VETO_FLAGS) if n not in off]
+        print(f"entry vetoes: ON  {', '.join(on) if on else '(none)'}"
+              + (f"   |  OFF {', '.join(off)}" if off else ""))
+        if not on:
+            print("  ^ every veto disabled — this is the NO-VETO arm with extra steps.")
     print(f"strategy: {strategy.name}"
          + ("" if strategy.name == "momentum" else "  (UNTESTED until this run completes)"))
+    for line in baseline_provenance_lines(
+            cfg.backtest.score_entry_threshold,
+            strategy.default_threshold,
+            getattr(strategy, "default_thresholds_grid", None)):
+        print(line)
     report = walk_forward_strategy(
         strategy,
         dfs,
@@ -415,6 +820,26 @@ def main() -> int:
     )
     print()
     print(report.summary_text())
+
+    # Whether the baseline arm actually traded enough to carry a verdict is a
+    # measurement, available only now. A grid check before the run cannot say it.
+    warn = thin_baseline_arm_warning((report.pooled_baseline or {}).get("n", 0),
+                                     (report.pooled_chosen or {}).get("n", 0))
+    if warn:
+        print(warn)
+
+    if args.save_folds:
+        # Everything needed to recompute the comparisons by hand, including
+        # what the run WAS: a fold table without its strategy, profile and
+        # baseline is a table of numbers nobody can place later.
+        out = saved_table(
+            run_provenance(args, strategy, cfg, len(dfs),
+                           measured_at=today_str_wib()),
+            report)
+        path = Path(args.save_folds)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(out, indent=2), encoding="utf-8")
+        print(f"\nfold table saved to {path}")
     return 0
 
 

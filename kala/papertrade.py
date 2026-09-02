@@ -158,22 +158,76 @@ def rotate_state_backup(state_path, backup_dir, keep: int = 7):
     return dest
 
 
-def _bars_held(entry_date: str, history) -> int | None:
-    """Trading bars since the entry fill (fill day = 0), or None if the entry
-    date isn't inside this history window. Same convention as backtest.py's
-    ``bars_held = i - entry_i`` — needed for the max-holding-period exit,
-    which is a VALIDATED rule the live path historically never applied."""
+def bars_held_or_reason(entry_date: str, history) -> tuple[int | None, str | None]:
+    """(trading bars since the entry fill, or None and WHY NOT).
+
+    Fill day = 0, same convention as backtest.py's ``bars_held = i - entry_i``.
+
+    WHY THIS RETURNS A REASON
+    -------------------------
+    The old version returned a bare ``None`` for every failure, and both
+    callers wrote ``if bars_held is not None and bars_held >= max_days``. A
+    None therefore produced exactly the same output as a young position: no
+    exit queued, no report line, nothing on screen. A position that could not
+    be aged simply never aged.
+
+    Under the ``forward_test`` profile that is not a missed nudge. Every
+    price-based exit is inert there by design — ``holding_max_days`` is the
+    ONLY rule that closes a position — so such a position has no exit at all
+    and is held forever, while ``/review`` keeps printing HOLD. "It kept on
+    telling me to hold" is the complaint this audit opened with.
+
+    WHY AN OFF-BAR DATE IS NOW COUNTED INSTEAD OF REFUSED
+    ----------------------------------------------------
+    The old match was an EXACT date equality against the price index, so a
+    date that is not itself a trading bar could never match. Two ordinary
+    routes produce one: ``manual_buy`` accepts any date string with no
+    trading-day validation, and ``daily_run`` has no trading-day guard at all,
+    so a scheduler firing on an IDX holiday (2026-05-01, 2026-08-17 — this
+    project has no exchange calendar) books fills stamped with that holiday.
+
+    A Saturday entry is not ambiguous: the position started at the next open.
+    Snapping FORWARD to the first bar at or after the entry date is the
+    correct reading and is identical to the old behaviour whenever the date
+    is on a bar.
+
+    WHAT IS STILL REFUSED, AND WHY IT IS NOT SNAPPED
+    -----------------------------------------------
+    An entry date BEFORE the first bar in this window is not snapped forward.
+    Doing so would measure from the start of the window rather than from the
+    entry, over-counting the bars held and exiting a position early — trading
+    a silent non-exit for a silent wrong exit. It returns a reason instead.
+    """
     try:
         key = pd.Timestamp(entry_date)
+    except (ValueError, TypeError):
+        return None, f"entry date {entry_date!r} is not a date"
+    if key is pd.NaT or pd.isna(key):
+        return None, f"entry date {entry_date!r} is not a date"
+    try:
         idx = history.index
         if getattr(idx, "tz", None) is not None:
             key = key.tz_localize(idx.tz)
-        mask = idx.normalize() == key.normalize()
-        if not mask.any():
-            return None
-        return int(len(idx) - 1 - mask.argmax())
-    except Exception:
-        return None
+        days = idx.normalize()
+        if not len(days):
+            return None, "no price history"
+        key = key.normalize()
+        if key < days[0]:
+            return None, (f"entry {key.date()} predates this history window "
+                          f"(starts {days[0].date()})")
+        if key > days[-1]:
+            return None, (f"entry {key.date()} is after the last bar "
+                          f"({days[-1].date()})")
+        # First bar AT OR AFTER the entry date. Exact for an on-bar date.
+        pos = int(days.searchsorted(key, side="left"))
+        return int(len(idx) - 1 - pos), None
+    except Exception as e:                     # noqa: BLE001 - named, not hidden
+        return None, f"{type(e).__name__}: {e}"
+
+
+def _bars_held(entry_date: str, history) -> int | None:
+    """Bars held, or None. Thin wrapper — new code should take the reason too."""
+    return bars_held_or_reason(entry_date, history)[0]
 
 
 @dataclass
@@ -313,7 +367,7 @@ class PaperTrader:
         pt = cls(path, cfg, charge_manual_costs=charge_manual_costs)
         p = Path(path)
         if p.exists():
-            raw = json.loads(p.read_text())
+            raw = json.loads(p.read_text(encoding="utf-8"))
             pt.cash = raw["cash"]
             pt.start_capital = raw["start_capital"]
             pt.positions = {t: PaperPosition(**r) for t, r in raw["positions"].items()}
@@ -350,7 +404,7 @@ class PaperTrader:
             "redo_stack": self.redo_stack,
         }, indent=2)
         tmp = self.path.with_name(self.path.name + ".tmp")
-        tmp.write_text(payload)
+        tmp.write_text(payload, encoding="utf-8")
         os.replace(tmp, self.path)
 
     # ---------------- undo / redo (manual actions only) ----------------
@@ -893,9 +947,18 @@ class PaperTrader:
                 # Max holding period — a VALIDATED exit rule (backtest.py)
                 # that the live path never applied until v3.3. Fill day = 0,
                 # same bar convention as the backtest.
-                held = _bars_held(pos.entry_date, h)
+                held, why = bars_held_or_reason(pos.entry_date, h)
                 max_days = self.cfg.backtest.holding_max_days
-                if held is not None and held >= max_days:
+                if held is None:
+                    # The position could not be AGED. Silence here reads as
+                    # "not due yet" and is indistinguishable from it on every
+                    # report — while under forward_test this is the only exit
+                    # rule there is, so the position is held forever. Same
+                    # reasoning as the missing-history branch above, which was
+                    # already fixed for exactly this reason.
+                    report["unevaluated"].append(
+                        f"{t}: max-holding rule NOT checked — {why}")
+                elif held >= max_days:
                     queue_reason = f"[CONSIDER] max holding period ({held} bars >= {max_days})"
                     headline = queue_reason
             if queue_reason is not None:
@@ -1040,17 +1103,28 @@ class PaperTrader:
         as 'watchlist'. Net P&L is in rupiah (exit-entry)*shares, matching
         what a real position actually made or lost, not a bare percentage.
 
-        Returns {"window_days", "n", "wins", "losses", "win_rate_pct",
-        "net_profit_idr", "trades": [{"ticker","pnl_pct","profit_idr",
-        "reason"}]} — trades sorted most-recent-first.
+        Returns {"window_days", "n", "skipped_unparseable", "wins", "losses",
+        "win_rate_pct", "net_profit_idr", "trades": [{"ticker","pnl_pct",
+        "profit_idr","reason"}]} — trades sorted most-recent-first.
+
+        ``skipped_unparseable`` counts closed trades whose date could not be
+        read. Those are excluded from every other figure here, so a non-zero
+        count means the win rate above is computed on an incomplete log.
         """
         from .clock import today_wib
         ref = today or today_wib()
         window: list[dict] = []
+        # A trade whose date will not parse used to be dropped here in silence.
+        # This function's whole claim is that "every closed trade in the window
+        # counts, wins and losses alike, nothing held back" — and a dropped
+        # LOSS raises the advertised win rate. Count them and hand the count
+        # back, so the promise is either true or visibly qualified.
+        skipped = 0
         for t in self.log:
             try:
                 d = date.fromisoformat(str(t["date"]))
             except (KeyError, TypeError, ValueError):
+                skipped += 1
                 continue
             if 0 <= (ref - d).days < days:
                 window.append(t)
@@ -1063,6 +1137,9 @@ class PaperTrader:
         return {
             "window_days": days,
             "n": len(window),
+            # >0 means the log holds closed trades this function could not
+            # place in time. They are NOT in any number below.
+            "skipped_unparseable": skipped,
             "wins": len(wins),
             "losses": len(losses),
             "win_rate_pct": (len(wins) / len(window) * 100.0) if window else 0.0,

@@ -49,11 +49,20 @@ class Check:
         return self.status == FAIL
 
 
+from .entry_settings import CONFIG_KEY as _ENTRY_VETO_KEY
+
 # Config keys the code actually reads. Kept explicit rather than imported from
 # daily_run so this module stays inside the package (daily_run imports kala,
 # not the reverse). test_preflight.py asserts this stays in sync with
 # daily_run.DEFAULT_CONFIG, so adding a key without registering it fails CI
 # rather than silently weakening the typo check.
+#
+# That guard covered DEFAULT_CONFIG only. Two keys read elsewhere were missing
+# — see the notes below — and for each of them this file confidently told the
+# user the setting was doing nothing. A registry that is wrong in that
+# direction is worse than no registry: it argues the user out of a correct
+# configuration. test_config_keys_are_registered.py now scans the source for
+# every literal key read off a config dict.
 KNOWN_CONFIG_KEYS = frozenset({
     # daily_run.DEFAULT_CONFIG
     "auto_paper_trade", "breaker_enabled", "breaker_halt_drawdown_pct",
@@ -65,8 +74,36 @@ KNOWN_CONFIG_KEYS = frozenset({
     "telegram_token", "walkforward_max_tickers", "walkforward_period",
     "watchlist_min_discount_pct", "weekly_fundamental_weekday",
     # read elsewhere (telegram_bot, rebalance, papertrade, intraday_watch)
-    "target_allocation", "costs", "charge_manual_costs",
+    # "costs" used to sit here. Nothing read it — the mirror image of the
+    # missing keys below: a registered key that does nothing, blessed by the
+    # very check that exists to catch settings that do nothing. Removed, and
+    # the registry is now checked in BOTH directions.
+    "target_allocation", "charge_manual_costs",
+    # Which spread model books live fills. Absent means "flat", the historical
+    # behaviour; "tick_floor" matches every measurement in this project. See
+    # config.live_costs for why the default is not simply corrected.
+    "costs_spread_mode",
     "intraday_pulse_minutes",
+    # which exit geometry the live loop trades — see config.config_for_profile.
+    # "legacy" keeps the historical stop/target/trailing ladder; "forward_test"
+    # runs the configuration the 2026-08 sweeps validated. Absent means legacy,
+    # so an untouched config never changes strategy on its own.
+    "exit_profile",
+    # monthly "who closed these positions" check — see kala/discipline.py
+    "discipline_report_enabled", "discipline_report_weekday",
+    # Circuit-breaker option read at daily_run.py's BreakerConfig. It was
+    # missing here, so preflight told the user a live SAFETY toggle "is not
+    # read by any code" and was "having no effect" — about a setting that
+    # governs whether a halt survives an unreadable state file.
+    "breaker_preserve_halt_when_unreadable",
+    # IMPORTED, not spelled out. This is the setting the audit's headline
+    # recommendation asks for (+4.23 points/trade), and preflight was telling
+    # anyone who applied it that it "is not read by any code. It is silently
+    # ignored, so whatever you set it to is having no effect." — the exact
+    # opposite of the truth, about the single most valuable change available.
+    # Importing the constant from the module that reads it makes that
+    # particular drift impossible rather than merely tested.
+    _ENTRY_VETO_KEY,
 })
 
 
@@ -242,7 +279,12 @@ def check_timers(runner=None) -> list[Check]:
                           "about timers can be verified from here.")]
 
         def runner(args):
+            # encoding pinned: systemctl output is decoded here, and the
+            # locale default differs between the CI box and a Windows dev
+            # machine. errors="replace" because a stray byte from an
+            # unrelated unit must not abort a preflight CHECK.
             return subprocess.run(args, capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace",
                                   timeout=10).stdout
 
     wanted = ["kala-bot.service", "kala-daily.timer", "kala-fundamentals.timer"]

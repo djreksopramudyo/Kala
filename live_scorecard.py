@@ -47,7 +47,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     try:
-        state = json.load(open(args.state))
+        state = json.load(open(args.state, encoding="utf-8"))
     except FileNotFoundError:
         print(f"No state file at {args.state}.", file=sys.stderr)
         return 1

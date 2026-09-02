@@ -55,7 +55,7 @@ def test_with_fallback_none_when_live_and_cache_both_miss(tmp_path):
 
 
 def test_load_corrupt_cache_is_a_miss_not_an_error(tmp_path):
-    (tmp_path / "BAD.JK.pkl").write_text("not a pickle")
+    (tmp_path / "BAD.JK.pkl").write_text("not a pickle", encoding="utf-8")
     assert datacache.load_frame("BAD.JK", cache_dir=tmp_path) is None
 
 

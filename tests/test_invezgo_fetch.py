@@ -24,7 +24,7 @@ FIXTURE = Path(__file__).parent / "fixtures" / "invezgo_broker_summary_bbca.json
 
 @pytest.fixture
 def broker_rows():
-    return json.loads(FIXTURE.read_text())
+    return json.loads(FIXTURE.read_text(encoding="utf-8"))
 
 
 # ---------------- _to_float --------------------------------------------------

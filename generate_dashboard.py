@@ -43,7 +43,7 @@ HISTORY_PERIOD = "6mo"     # covers typical swing-trade holding periods for
 
 def _load_config(path: str) -> dict:
     try:
-        return json.loads(Path(path).read_text())
+        return json.loads(Path(path).read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 

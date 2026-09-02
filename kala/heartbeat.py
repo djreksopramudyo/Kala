@@ -33,7 +33,7 @@ def write_heartbeat(path: str | Path = DEFAULT_PATH, now: float | None = None) -
     tests) unix timestamp. Cheap and atomic enough for this purpose —
     a torn write just means one healthcheck cycle reads a stale-looking
     value, not silent corruption of anything that matters."""
-    Path(path).write_text(str(now if now is not None else time.time()))
+    Path(path).write_text(str(now if now is not None else time.time()), encoding="utf-8")
 
 
 def heartbeat_age_seconds(path: str | Path = DEFAULT_PATH, now: float | None = None) -> float | None:
@@ -44,7 +44,7 @@ def heartbeat_age_seconds(path: str | Path = DEFAULT_PATH, now: float | None = N
     if not p.exists():
         return None
     try:
-        written = float(p.read_text().strip())
+        written = float(p.read_text(encoding="utf-8").strip())
     except ValueError:
         return None
     return (now if now is not None else time.time()) - written
